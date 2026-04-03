@@ -2,6 +2,8 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRequestStore } from '../../stores/request';
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 import StatusBadge from '../common/StatusBadge.vue';
 
 const { t } = useI18n();
@@ -23,7 +25,10 @@ const formattedBody = computed(() => {
   if (contentType.includes('json')) {
     try {
       const parsed = JSON.parse(body);
-      return JSON.stringify(parsed, null, 2);
+      if (viewMode.value === 'pretty') {
+        return JSON.stringify(parsed, null, 2); // Pretty: indenté
+      }
+      return JSON.stringify(parsed); // Raw: compact/minified
     } catch {
       return body;
     }
@@ -31,14 +36,33 @@ const formattedBody = computed(() => {
   return body;
 });
 
-// JSON Syntax Highlighting
+// Body content based on view mode
+const displayedLines = computed(() => {
+  if (viewMode.value === 'raw') {
+    // Raw mode: no syntax highlighting, use formattedBody (minified JSON)
+    const body = formattedBody.value;
+    return body.split('\n').map(line => escapeHtml(line) || ' ');
+  }
+  // Pretty mode: use syntax highlighting
+  return highlightedLines.value;
+});
+
+// Escape HTML for raw mode
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 const highlightedLines = computed(() => {
   const lines = formattedBody.value.split('\n');
   return lines.map(line => {
     // Use inline styles for reliable colors on dark background
-    let highlighted = line
-      .replace(/"([^"]*)"(?=:)/g, '<span style="color: #9cdcfe;">"$1"</span>') // keys - light blue
-      .replace(/: "([^"]*)"/g, ': <span style="color: #ce9178;">"$1"</span>') // string values - orange
+    let highlighted = escapeHtml(line)
+      .replace(/&quot;([^&]*)&quot;(?=:)/g, '<span style="color: #9cdcfe;">"$1"</span>') // keys - light blue
+      .replace(/: &quot;([^&]*)&quot;/g, ': <span style="color: #ce9178;">"$1"</span>') // string values - orange
       .replace(/: (\d+)/g, ': <span style="color: #b5cea8;">$1</span>') // numbers - light green
       .replace(/: (true|false)/g, ': <span style="color: #569cd6;">$1</span>') // booleans - blue
       .replace(/: (null)/g, ': <span style="color: #569cd6;">$1</span>') // null - blue
@@ -47,26 +71,41 @@ const highlightedLines = computed(() => {
   });
 });
 
+// Parse cookies from Set-Cookie header
+const cookies = computed(() => {
+  const headers = requestStore.currentResponse?.headers || {};
+  const setCookieHeader = headers['set-cookie'] || headers['Set-Cookie'];
+  if (!setCookieHeader) return [];
+  
+  // Split by comma, but be careful with expires dates that contain commas
+  return setCookieHeader.split(',').map(cookie => cookie.trim()).filter(Boolean);
+});
+
 function copyToClipboard() {
   if (requestStore.currentResponse?.body) {
     navigator.clipboard.writeText(requestStore.currentResponse.body);
   }
 }
 
-function downloadResponse() {
+async function downloadResponse() {
   if (!requestStore.currentResponse?.body) return;
   
-  const blob = new Blob([requestStore.currentResponse.body], { 
-    type: requestStore.currentResponse.contentType || 'text/plain' 
+  const contentType = requestStore.currentResponse.contentType || 'text/plain';
+  const extension = contentType.includes('json') ? 'json' : 'txt';
+  const defaultName = `response-${Date.now()}.${extension}`;
+  
+  const filePath = await save({
+    defaultPath: defaultName,
+    filters: [
+      { name: 'JSON', extensions: ['json'] },
+      { name: 'Text', extensions: ['txt'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
   });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `response-${Date.now()}.${requestStore.currentResponse.contentType.includes('json') ? 'json' : 'txt'}`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  
+  if (filePath) {
+    await writeTextFile(filePath, requestStore.currentResponse.body);
+  }
 }
 </script>
 
@@ -89,7 +128,7 @@ function downloadResponse() {
       <div class="ml-auto flex items-center gap-2">
         <button
           class="p-1.5 text-[#6b7280] hover:text-[#374151] hover:bg-[#e5e7eb] rounded transition-colors"
-          title="Copy to clipboard"
+          :title="t('common.copyToClipboard')"
           @click="copyToClipboard"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +137,7 @@ function downloadResponse() {
         </button>
         <button
           class="p-1.5 text-[#6b7280] hover:text-[#374151] hover:bg-[#e5e7eb] rounded transition-colors"
-          title="Download response"
+          :title="t('common.downloadResponse')"
           @click="downloadResponse"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +212,7 @@ function downloadResponse() {
             ]"
             @click="viewMode = 'pretty'"
           >
-            Pretty
+            {{ t('common.pretty') }}
           </button>
           <button
             :class="[
@@ -182,47 +221,51 @@ function downloadResponse() {
             ]"
             @click="viewMode = 'raw'"
           >
-            Raw
+            {{ t('common.raw') }}
           </button>
           <span class="ml-auto text-xs text-[#9ca3af]">{{ requestStore.currentResponse.contentType }}</span>
         </div>
 
         <!-- Code with Line Numbers and Syntax Highlighting -->
         <div class="flex-1 overflow-auto bg-[#1e1e1e]">
-          <div class="flex min-h-full">
-            <!-- Line Numbers -->
-            <div class="flex-shrink-0 py-4 px-3 text-right bg-[#252526] text-[#6e7681] text-sm font-mono select-none">
-              <div v-for="n in highlightedLines.length" :key="n" class="leading-5">{{ n }}</div>
-            </div>
-            <!-- Code -->
-            <div class="flex-1 py-4 px-4 overflow-x-auto">
-              <pre class="text-sm font-mono leading-5 whitespace-pre" style="color: #d4d4d4;"><div v-for="(line, index) in highlightedLines" :key="index" v-html="line || ' '"/></pre>
-            </div>
-          </div>
+          <table class="border-collapse">
+            <tbody>
+              <tr v-for="(line, index) in displayedLines" :key="index">
+                <td class="py-0 px-3 text-right bg-[#252526] text-[#6e7681] text-sm font-mono select-none whitespace-nowrap">{{ index + 1 }}</td>
+                <td class="py-0 px-4 text-sm font-mono whitespace-pre" style="color: #d4d4d4;"><div v-html="line || ' '"/></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <!-- Headers Tab -->
-      <div v-else-if="activeTab === 'headers'" class="p-4 overflow-y-auto h-full">
-        <div class="border border-[#e5e7eb] rounded-lg overflow-hidden">
-          <div
-            v-for="(value, key) in requestStore.currentResponse.headers"
-            :key="key"
-            class="flex border-b border-[#e5e7eb] last:border-b-0"
-          >
-            <div class="w-1/3 px-4 py-2 bg-[#f9fafb] text-sm font-medium text-[#374151] border-r border-[#e5e7eb]">{{ key }}</div>
-            <div class="w-2/3 px-4 py-2 text-sm text-[#6b7280] break-all font-mono bg-white">{{ value }}</div>
-          </div>
-        </div>
+      <div v-else-if="activeTab === 'headers'" class="flex-1 overflow-auto bg-white">
+        <table class="border-collapse w-full">
+          <tbody>
+            <tr v-for="(value, key) in requestStore.currentResponse.headers" :key="key" class="border-b border-[#e5e7eb]">
+              <td class="w-1/3 px-4 py-2 bg-[#f9fafb] text-sm font-medium text-[#374151] border-r border-[#e5e7eb] whitespace-nowrap">{{ key }}</td>
+              <td class="px-4 py-2 text-sm text-[#6b7280] whitespace-pre font-mono bg-white">{{ value }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Cookies Tab -->
-      <div v-else-if="activeTab === 'cookies'" class="p-4 h-full">
-        <div class="flex flex-col items-center justify-center h-full text-[#6b7280]">
+      <div v-else-if="activeTab === 'cookies'" class="flex-1 overflow-auto bg-white">
+        <table v-if="cookies.length > 0" class="border-collapse w-full">
+          <tbody>
+            <tr v-for="(cookie, index) in cookies" :key="index" class="border-b border-[#e5e7eb]">
+              <td class="w-12 px-4 py-2 bg-[#f9fafb] text-sm font-medium text-[#374151] border-r border-[#e5e7eb] text-center">{{ index + 1 }}</td>
+              <td class="px-4 py-2 text-sm text-[#6b7280] whitespace-pre font-mono bg-white">{{ cookie }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div v-else class="flex flex-col items-center justify-center h-full text-[#6b7280]">
           <svg class="w-12 h-12 mb-3 text-[#d1d5db]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          <p class="text-sm">No cookies received</p>
+          <p class="text-sm">{{ t('common.noCookies') }}</p>
         </div>
       </div>
     </div>

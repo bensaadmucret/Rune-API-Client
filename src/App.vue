@@ -12,7 +12,7 @@ import ResponseViewer from './components/request/ResponseViewer.vue';
     <Sidebar />
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Request Builder -->
       <RequestBuilder />
 
@@ -24,7 +24,7 @@ import ResponseViewer from './components/request/ResponseViewer.vue';
         </div>
 
         <!-- Response Viewer -->
-        <div class="flex-1 bg-white">
+        <div class="flex-1 bg-white overflow-auto min-w-0">
           <ResponseViewer />
         </div>
       </div>

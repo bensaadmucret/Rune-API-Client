@@ -41,9 +41,12 @@ A powerful, cross-platform API testing client built with **Rust**, **Tauri**, an
 - 🎨 **Syntax Highlighting** - JSON response highlighting with color-coded keys, strings, numbers
 - 📊 **Response Info** - Status code, response time, and size at a glance
 - 🗂️ **Tabs** - Body, Headers, and Cookies organized in tabs with count badges
-- 🌓 **View Modes** - Pretty-printed and raw response views
-- 📋 **Copy & Download** - One-click copy to clipboard or download response as file
+- 🌓 **View Modes** - Pretty-printed (indented + colored) and raw (minified JSON) views
+- ↔️ **Horizontal Scroll** - Scroll to see complete content without truncation
+- 📋 **Copy & Download** - One-click copy to clipboard or download response as file (Tauri native dialog)
 - 🔢 **Line Numbers** - Code editor-style display with line numbers
+- 📜 **Headers View** - Full headers display with horizontal scroll for long values
+- 🍪 **Cookies View** - Parse and display Set-Cookie headers
 
 ### History
 - ⏱️ **Request History** - Automatic tracking of all sent requests
@@ -160,9 +163,12 @@ Click **Load Test Data** button in the sidebar footer to populate the app with s
 - [x] Response visualization
 - [x] Internationalization (EN/FR)
 
-### Phase 2: Enhanced (🔄 In Progress)
-- [ ] SQLite persistence
-- [ ] Import/Export (Postman collections)
+### Phase 2: Enhanced (✅ Completed)
+- [x] SQLite persistence
+- [x] Import/Export (Postman collections)
+- [x] Response visualization with horizontal scroll
+- [x] Raw/Pretty JSON view modes
+- [x] Native file download dialog
 - [ ] Pre-request scripts
 - [ ] Response assertions/tests
 - [ ] WebSocket support

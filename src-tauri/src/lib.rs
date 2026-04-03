@@ -1,7 +1,11 @@
-use reqwest::{Client, Method, header::HeaderMap};
+use reqwest::{header::HeaderMap, Client, Method};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
+use tauri::Manager;
+
+pub mod database;
+use database::Database;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpRequest {
@@ -52,7 +56,7 @@ fn parse_method(method: &str) -> Method {
 #[tauri::command]
 async fn execute_http_request(request: HttpRequest) -> Result<RequestResult, String> {
     let start = Instant::now();
-    
+
     let client = Client::builder()
         .timeout(Duration::from_secs(30))
         .build()
@@ -145,7 +149,41 @@ fn greet(name: &str) -> String {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, execute_http_request])
+        .plugin(tauri_plugin_sql::Builder::default().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
+        .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::block_on(async move {
+                let db = Database::new(&handle).await.expect("Failed to initialize database");
+                handle.manage(db);
+            });
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            execute_http_request,
+            database::commands::get_collections,
+            database::commands::create_collection,
+            database::commands::update_collection,
+            database::commands::delete_collection,
+            database::commands::get_folders,
+            database::commands::create_folder,
+            database::commands::delete_folder,
+            database::commands::get_requests,
+            database::commands::create_request,
+            database::commands::update_request,
+            database::commands::delete_request,
+            database::commands::get_environments,
+            database::commands::create_environment,
+            database::commands::delete_environment,
+            database::commands::get_environment_variables,
+            database::commands::set_environment_variables,
+            database::commands::get_history,
+            database::commands::add_history,
+            database::commands::clear_history,
+            database::commands::delete_history_entry,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
