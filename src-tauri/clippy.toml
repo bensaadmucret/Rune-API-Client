@@ -1,0 +1,10 @@
+# Clippy configuration for strict linting
+# See: https://rust-lang.github.io/rust-clippy/master/index.html
+
+# Thresholds for complexity lints
+cognitive-complexity-threshold = 25
+too-many-lines-threshold = 100
+type-complexity-threshold = 500
+
+# Error thresholds
+large-error-threshold = 1024

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../../stores/app';
+
+const { t } = useI18n();
+const appStore = useAppStore();
 
 const props = defineProps<{
   show: boolean;
@@ -10,8 +14,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
-
-const appStore = useAppStore();
 
 const name = ref('');
 const error = ref('');
@@ -24,7 +26,7 @@ function close() {
 
 function createFolder() {
   if (!name.value.trim()) {
-    error.value = 'Folder name is required';
+    error.value = t('modal.folderNameRequired');
     return;
   }
 
@@ -56,7 +58,7 @@ function createFolder() {
       <div class="bg-white rounded-lg shadow-xl w-[400px] max-w-[90vw]">
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb]">
-          <h2 class="text-lg font-semibold text-[#111827]">New Folder</h2>
+          <h2 class="text-lg font-semibold text-[#111827]">{{ t('modal.newFolder') }}</h2>
           <button
             class="p-1.5 text-[#6b7280] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
@@ -71,12 +73,12 @@ function createFolder() {
         <div class="p-6">
           <div>
             <label class="block text-sm font-medium text-[#374151] mb-1">
-              Name <span class="text-[#ef4444]">*</span>
+              {{ t('common.name') }} <span class="text-[#ef4444]">*</span>
             </label>
             <input
               v-model="name"
               type="text"
-              placeholder="Folder name"
+              :placeholder="t('modal.folderNamePlaceholder')"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent"
               @keyup.enter="createFolder"
             />
@@ -90,13 +92,13 @@ function createFolder() {
             class="px-4 py-2 text-sm font-medium text-[#6b7280] hover:text-[#374151] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </button>
           <button
             class="px-4 py-2 text-sm font-medium text-white bg-[#3b82f6] hover:bg-[#2563eb] rounded-md transition-colors"
             @click="createFolder"
           >
-            Create Folder
+            {{ t('modal.createFolder') }}
           </button>
         </div>
       </div>

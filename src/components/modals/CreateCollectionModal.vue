@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../../stores/app';
+
+const { t } = useI18n();
+const appStore = useAppStore();
 
 defineProps<{
   show: boolean;
@@ -9,8 +13,6 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
-
-const appStore = useAppStore();
 
 const name = ref('');
 const description = ref('');
@@ -32,7 +34,7 @@ function close() {
 
 function createCollection() {
   if (!name.value.trim()) {
-    error.value = 'Collection name is required';
+    error.value = t('modal.collectionNameRequired');
     return;
   }
 
@@ -69,7 +71,7 @@ function createCollection() {
       <div class="bg-white rounded-lg shadow-xl w-[480px] max-w-[90vw]">
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb]">
-          <h2 class="text-lg font-semibold text-[#111827]">New Collection</h2>
+          <h2 class="text-lg font-semibold text-[#111827]">{{ t('modal.newCollection') }}</h2>
           <button
             class="p-1.5 text-[#6b7280] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
@@ -84,12 +86,12 @@ function createCollection() {
         <div class="p-6 space-y-4">
           <div>
             <label class="block text-sm font-medium text-[#374151] mb-1">
-              Name <span class="text-[#ef4444]">*</span>
+              {{ t('common.name') }} <span class="text-[#ef4444]">*</span>
             </label>
             <input
               v-model="name"
               type="text"
-              placeholder="My API Collection"
+              :placeholder="t('modal.collectionNamePlaceholder')"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent"
               @keyup.enter="createCollection"
             />
@@ -97,17 +99,17 @@ function createCollection() {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-[#374151] mb-1">Description</label>
+            <label class="block text-sm font-medium text-[#374151] mb-1">{{ t('common.description') }}</label>
             <textarea
               v-model="description"
               rows="2"
-              placeholder="Optional description..."
+              :placeholder="t('modal.descriptionPlaceholder')"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent resize-none"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-[#374151] mb-2">Color</label>
+            <label class="block text-sm font-medium text-[#374151] mb-2">{{ t('common.color') }}</label>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="c in colors"
@@ -129,13 +131,13 @@ function createCollection() {
             class="px-4 py-2 text-sm font-medium text-[#6b7280] hover:text-[#374151] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </button>
           <button
             class="px-4 py-2 text-sm font-medium text-white bg-[#3b82f6] hover:bg-[#2563eb] rounded-md transition-colors"
             @click="createCollection"
           >
-            Create Collection
+            {{ t('modal.createCollection') }}
           </button>
         </div>
       </div>

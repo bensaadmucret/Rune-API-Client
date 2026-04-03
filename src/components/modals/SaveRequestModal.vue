@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../../stores/app';
 import type { HttpRequest } from '../../types';
+
+const { t } = useI18n();
+const appStore = useAppStore();
 
 const props = defineProps<{
   show: boolean;
@@ -11,8 +15,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
-
-const appStore = useAppStore();
 
 const selectedCollectionId = ref('');
 const selectedFolderId = ref('');
@@ -29,12 +31,12 @@ function close() {
 
 function saveRequest() {
   if (!requestName.value.trim()) {
-    error.value = 'Request name is required';
+    error.value = t('modal.requestNameRequired');
     return;
   }
 
   if (!selectedCollectionId.value) {
-    error.value = 'Please select a collection';
+    error.value = t('modal.selectCollection');
     return;
   }
 
@@ -71,7 +73,7 @@ function saveRequest() {
       <div class="bg-white rounded-lg shadow-xl w-[480px] max-w-[90vw]">
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb]">
-          <h2 class="text-lg font-semibold text-[#111827]">Save Request</h2>
+          <h2 class="text-lg font-semibold text-[#111827]">{{ t('modal.saveRequest') }}</h2>
           <button
             class="p-1.5 text-[#6b7280] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
@@ -86,25 +88,25 @@ function saveRequest() {
         <div class="p-6 space-y-4">
           <div>
             <label class="block text-sm font-medium text-[#374151] mb-1">
-              Request Name <span class="text-[#ef4444]">*</span>
+              {{ t('modal.requestName') }} <span class="text-[#ef4444]">*</span>
             </label>
             <input
               v-model="requestName"
               type="text"
-              :placeholder="request.url || 'My Request'"
+              :placeholder="request.url || t('modal.requestNamePlaceholder')"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent"
             />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-[#374151] mb-1">
-              Collection <span class="text-[#ef4444]">*</span>
+              {{ t('modal.collection') }} <span class="text-[#ef4444]">*</span>
             </label>
             <select
               v-model="selectedCollectionId"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent"
             >
-              <option value="">Select a collection</option>
+              <option value="">{{ t('modal.selectCollection') }}</option>
               <option
                 v-for="collection in appStore.collections"
                 :key="collection.id"
@@ -116,12 +118,12 @@ function saveRequest() {
           </div>
 
           <div v-if="selectedCollectionId">
-            <label class="block text-sm font-medium text-[#374151] mb-1">Folder (Optional)</label>
+            <label class="block text-sm font-medium text-[#374151] mb-1">{{ t('modal.folderOptional') }}</label>
             <select
               v-model="selectedFolderId"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent"
             >
-              <option value="">Root of collection</option>
+              <option value="">{{ t('modal.rootOfCollection') }}</option>
               <option
                 v-for="folder in appStore.collections.find(c => c.id === selectedCollectionId)?.folders"
                 :key="folder.id"
@@ -141,13 +143,13 @@ function saveRequest() {
             class="px-4 py-2 text-sm font-medium text-[#6b7280] hover:text-[#374151] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </button>
           <button
             class="px-4 py-2 text-sm font-medium text-white bg-[#3b82f6] hover:bg-[#2563eb] rounded-md transition-colors"
             @click="saveRequest"
           >
-            Save Request
+            {{ t('common.save') }}
           </button>
         </div>
       </div>

@@ -93,10 +93,10 @@ function updateUrlFromParams() {
 // Authentication
 const authType = ref<'none' | 'bearer' | 'apikey' | 'basic'>('none');
 const authTypes: { value: 'none' | 'bearer' | 'apikey' | 'basic'; label: string }[] = [
-  { value: 'none', label: 'No Auth' },
-  { value: 'bearer', label: 'Bearer Token' },
-  { value: 'apikey', label: 'API Key' },
-  { value: 'basic', label: 'Basic Auth' },
+  { value: 'none', label: 'requestTabs.authTypes.none' },
+  { value: 'bearer', label: 'requestTabs.authTypes.bearer' },
+  { value: 'apikey', label: 'requestTabs.authTypes.apikey' },
+  { value: 'basic', label: 'requestTabs.authTypes.basic' },
 ];
 
 const authConfig = ref({
@@ -305,7 +305,7 @@ function applyBasicAuth() {
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Add Header
+          {{ t('requestTabs.addHeader') }}
         </button>
       </div>
 
@@ -373,7 +373,7 @@ function applyBasicAuth() {
       <!-- Params Tab -->
       <div v-else-if="activeTab === 'params'" class="h-full flex flex-col">
         <div class="flex items-center justify-between px-4 py-2 border-b border-[#e5e7eb] bg-[#fafafa]">
-          <span class="text-xs text-[#6b7280]">Query Parameters</span>
+          <span class="text-xs text-[#6b7280]">{{ t('requestTabs.queryParams') }}</span>
           <button
             class="flex items-center gap-1 px-2 py-1 text-xs text-[#3b82f6] hover:bg-[#eff6ff] rounded transition-colors"
             @click="addQueryParam"
@@ -381,7 +381,7 @@ function applyBasicAuth() {
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            Add Param
+            {{ t('requestTabs.addParam') }}
           </button>
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -389,8 +389,8 @@ function applyBasicAuth() {
             <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <p class="text-sm">Query params will be automatically parsed from URL</p>
-            <p class="text-xs mt-1">Or add them manually below</p>
+            <p class="text-sm">{{ t('requestTabs.queryParamsHint') }}</p>
+            <p class="text-xs mt-1">{{ t('requestTabs.queryParamsManual') }}</p>
           </div>
           <div
             v-for="(param, index) in queryParams"
@@ -452,7 +452,7 @@ function applyBasicAuth() {
               ]"
               @click="authType = type.value"
             >
-              {{ type.label }}
+              {{ t(type.label) }}
             </button>
           </div>
 
@@ -461,17 +461,17 @@ function applyBasicAuth() {
             <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
             </svg>
-            <p class="text-sm">No authentication selected</p>
+            <p class="text-sm">{{ t('requestTabs.noAuth') }}</p>
           </div>
 
           <!-- Bearer Token -->
           <div v-else-if="authType === 'bearer'" class="space-y-3">
             <div>
-              <label class="block text-sm font-medium text-[#374151] mb-1">Token</label>
+              <label class="block text-sm font-medium text-[#374151] mb-1">{{ t('requestTabs.token') }}</label>
               <input
                 v-model="authConfig.token"
                 type="text"
-                placeholder="Bearer token"
+                :placeholder="t('requestTabs.tokenPlaceholder')"
                 class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
               />
             </div>
@@ -479,27 +479,27 @@ function applyBasicAuth() {
               class="px-4 py-2 bg-[#3b82f6] text-white text-sm font-medium rounded-md hover:bg-[#2563eb] transition-colors"
               @click="applyBearerAuth"
             >
-              Apply to Headers
+              {{ t('requestTabs.applyToHeaders') }}
             </button>
           </div>
 
           <!-- API Key -->
           <div v-else-if="authType === 'apikey'" class="space-y-3">
             <div>
-              <label class="block text-sm font-medium text-[#374151] mb-1">Key Name</label>
+              <label class="block text-sm font-medium text-[#374151] mb-1">{{ t('requestTabs.keyName') }}</label>
               <input
                 v-model="authConfig.keyName"
                 type="text"
-                placeholder="X-API-Key"
+                :placeholder="t('requestTabs.keyPlaceholder')"
                 class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-[#374151] mb-1">Key Value</label>
+              <label class="block text-sm font-medium text-[#374151] mb-1">{{ t('requestTabs.keyValue') }}</label>
               <input
                 v-model="authConfig.keyValue"
                 type="text"
-                placeholder="Your API key"
+                :placeholder="t('requestTabs.keyValuePlaceholder')"
                 class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
               />
             </div>
@@ -511,7 +511,7 @@ function applyBasicAuth() {
                   value="header"
                   class="text-[#3b82f6]"
                 />
-                <span class="text-sm text-[#374151]">Header</span>
+                <span class="text-sm text-[#374151]">{{ t('requestTabs.header') }}</span>
               </label>
               <label class="flex items-center gap-2">
                 <input
@@ -520,34 +520,34 @@ function applyBasicAuth() {
                   value="query"
                   class="text-[#3b82f6]"
                 />
-                <span class="text-sm text-[#374151]">Query Param</span>
+                <span class="text-sm text-[#374151]">{{ t('requestTabs.queryParam') }}</span>
               </label>
             </div>
             <button
               class="px-4 py-2 bg-[#3b82f6] text-white text-sm font-medium rounded-md hover:bg-[#2563eb] transition-colors"
               @click="applyApiKeyAuth"
             >
-              Apply
+              {{ t('requestTabs.apply') }}
             </button>
           </div>
 
           <!-- Basic Auth -->
           <div v-else-if="authType === 'basic'" class="space-y-3">
             <div>
-              <label class="block text-sm font-medium text-[#374151] mb-1">Username</label>
+              <label class="block text-sm font-medium text-[#374151] mb-1">{{ t('requestTabs.username') }}</label>
               <input
                 v-model="authConfig.username"
                 type="text"
-                placeholder="Username"
+                :placeholder="t('requestTabs.username')"
                 class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-[#374151] mb-1">Password</label>
+              <label class="block text-sm font-medium text-[#374151] mb-1">{{ t('requestTabs.password') }}</label>
               <input
                 v-model="authConfig.password"
                 type="password"
-                placeholder="Password"
+                :placeholder="t('requestTabs.password')"
                 class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
               />
             </div>
@@ -555,7 +555,7 @@ function applyBasicAuth() {
               class="px-4 py-2 bg-[#3b82f6] text-white text-sm font-medium rounded-md hover:bg-[#2563eb] transition-colors"
               @click="applyBasicAuth"
             >
-              Apply to Headers
+              {{ t('requestTabs.applyToHeaders') }}
             </button>
           </div>
         </div>

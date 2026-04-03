@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../../stores/app';
 import type { EnvironmentVariable } from '../../types';
 
+const { t } = useI18n();
 const appStore = useAppStore();
 
 defineProps<{
@@ -38,7 +40,7 @@ function removeVariable(index: number) {
 
 function createEnvironment() {
   if (!name.value.trim()) {
-    error.value = 'Environment name is required';
+    error.value = t('modal.environmentNameRequired');
     return;
   }
 
@@ -71,7 +73,7 @@ function createEnvironment() {
       <div class="bg-white rounded-lg shadow-xl w-[600px] max-w-[90vw] max-h-[80vh] flex flex-col">
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb]">
-          <h2 class="text-lg font-semibold text-[#111827]">New Environment</h2>
+          <h2 class="text-lg font-semibold text-[#111827]">{{ t('modal.newEnvironment') }}</h2>
           <button
             class="p-1.5 text-[#6b7280] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
@@ -86,12 +88,12 @@ function createEnvironment() {
         <div class="p-6 overflow-y-auto flex-1">
           <div class="mb-4">
             <label class="block text-sm font-medium text-[#374151] mb-1">
-              Name <span class="text-[#ef4444]">*</span>
+              {{ t('common.name') }} <span class="text-[#ef4444]">*</span>
             </label>
             <input
               v-model="name"
               type="text"
-              placeholder="Development, Production, etc."
+              :placeholder="t('modal.environmentNamePlaceholder')"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent"
             />
             <p v-if="error" class="mt-1 text-sm text-[#ef4444]">{{ error }}</p>
@@ -99,7 +101,7 @@ function createEnvironment() {
 
           <div>
             <div class="flex items-center justify-between mb-2">
-              <label class="block text-sm font-medium text-[#374151]">Variables</label>
+              <label class="block text-sm font-medium text-[#374151]">{{ t('common.variables') }}</label>
               <button
                 class="flex items-center gap-1 px-2 py-1 text-sm text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors"
                 @click="addVariable"
@@ -107,7 +109,7 @@ function createEnvironment() {
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Variable
+                {{ t('common.addVariable') }}
               </button>
             </div>
 
@@ -120,21 +122,21 @@ function createEnvironment() {
                 <input
                   v-model="variable.key"
                   type="text"
-                  placeholder="Variable name"
+                  :placeholder="t('modal.variableNamePlaceholder')"
                   class="flex-1 px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent text-sm"
                 />
                 <input
                   v-model="variable.value"
                   type="text"
-                  placeholder="Value"
+                  :placeholder="t('common.value')"
                   class="flex-1 px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent text-sm"
                 />
                 <select
                   v-model="variable.type"
                   class="px-2 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
                 >
-                  <option value="default">Default</option>
-                  <option value="secret">Secret</option>
+                  <option value="default">{{ t('common.default') }}</option>
+                  <option value="secret">{{ t('common.secret') }}</option>
                 </select>
                 <button
                   class="p-2 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-md transition-colors"
@@ -147,7 +149,7 @@ function createEnvironment() {
               </div>
 
               <p v-if="variables.length === 0" class="text-sm text-[#6b7280] italic">
-                No variables yet. Click "Add Variable" to add one.
+                {{ t('modal.noVariablesYet') }}
               </p>
             </div>
           </div>
@@ -159,13 +161,13 @@ function createEnvironment() {
             class="px-4 py-2 text-sm font-medium text-[#6b7280] hover:text-[#374151] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </button>
           <button
             class="px-4 py-2 text-sm font-medium text-white bg-[#3b82f6] hover:bg-[#2563eb] rounded-md transition-colors"
             @click="createEnvironment"
           >
-            Create Environment
+            {{ t('modal.createEnvironment') }}
           </button>
         </div>
       </div>

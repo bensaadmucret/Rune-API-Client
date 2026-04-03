@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../../stores/app';
 
+const { t } = useI18n();
 const appStore = useAppStore();
 const showVariables = ref(false);
 
@@ -53,9 +55,9 @@ function close() {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
       </svg>
       <span v-if="activeEnvVars.length > 0">
-        {{ activeEnvVars.length }} variable{{ activeEnvVars.length > 1 ? 's' : '' }}
+        {{ activeEnvVars.length }} {{ activeEnvVars.length > 1 ? t('common.variables') : t('common.variable') }}
       </span>
-      <span v-else>Environment Variables</span>
+      <span v-else>{{ t('environment.title') }}</span>
     </button>
 
     <!-- Variables Panel Modal -->
@@ -76,9 +78,9 @@ function close() {
           <!-- Header -->
           <div class="flex items-center justify-between px-4 py-3 border-b border-[#e5e7eb]">
             <div>
-              <h2 class="text-lg font-semibold text-[#111827]">Environment Variables</h2>
+              <h2 class="text-lg font-semibold text-[#111827]">{{ t('environment.title') }}</h2>
               <p class="text-xs text-[#6b7280] mt-0.5">
-                {{ appStore.activeEnvironment?.name || 'No environment selected' }}
+                {{ appStore.activeEnvironment?.name || t('environment.noEnvironmentSelected') }}
               </p>
             </div>
             <button
@@ -98,16 +100,16 @@ function close() {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <p class="text-sm">Select an environment first</p>
+              <p class="text-sm">{{ t('environment.selectEnvironmentFirst') }}</p>
             </div>
 
             <div v-else-if="activeEnvVars.length === 0" class="text-center py-8 text-[#6b7280]">
-              <p class="text-sm">No variables yet</p>
+              <p class="text-sm">{{ t('environment.noVariables') }}</p>
               <button
                 class="mt-2 px-3 py-1.5 text-sm text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors"
                 @click="addVariable"
               >
-                Add your first variable
+                {{ t('environment.addFirstVariable') }}
               </button>
             </div>
 
@@ -120,14 +122,14 @@ function close() {
                 <input
                   :value="variable.key"
                   type="text"
-                  placeholder="VARIABLE_NAME"
+                  :placeholder="t('environment.variablePlaceholder')"
                   class="flex-1 px-3 py-2 border border-[#e5e7eb] rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
                   @input="updateVariable(index, { key: ($event.target as HTMLInputElement).value })"
                 />
                 <input
                   :value="variable.value"
                   :type="variable.type === 'secret' ? 'password' : 'text'"
-                  placeholder="value"
+                  :placeholder="t('environment.valuePlaceholder')"
                   class="flex-1 px-3 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
                   @input="updateVariable(index, { value: ($event.target as HTMLInputElement).value })"
                 />
@@ -136,8 +138,8 @@ function close() {
                   class="px-2 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
                   @change="updateVariable(index, { type: ($event.target as HTMLSelectElement).value as 'default' | 'secret' })"
                 >
-                  <option value="default">Default</option>
-                  <option value="secret">Secret</option>
+                  <option value="default">{{ t('common.default') }}</option>
+                  <option value="secret">{{ t('common.secret') }}</option>
                 </select>
                 <button
                   class="p-2 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-md transition-colors"
@@ -153,7 +155,7 @@ function close() {
 
           <!-- Footer -->
           <div v-if="appStore.activeEnvironment" class="flex items-center justify-between px-4 py-3 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg">
-            <span class="text-xs text-[#6b7280]">Use {'{{'} variable_name {'}}'} in URL, headers or body</span>
+            <span class="text-xs text-[#6b7280]">{{ t('environment.usageHint') }}</span>
             <button
               class="flex items-center gap-1 px-3 py-1.5 text-sm text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors"
               @click="addVariable"
@@ -161,7 +163,7 @@ function close() {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              Add Variable
+              {{ t('common.addVariable') }}
             </button>
           </div>
         </div>
