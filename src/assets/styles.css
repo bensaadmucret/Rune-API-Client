@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Design tokens based on reference image */
+:root {
+  /* Primary colors */
+  --color-get: #3b82f6;
+  --color-post: #22c55e;
+  --color-put: #f59e0b;
+  --color-delete: #ef4444;
+  --color-patch: #a855f7;
+  --color-head: #6366f1;
+  --color-options: #8b5cf6;
+
+  /* Status colors */
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Neutral colors */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+  --color-bg-section: #f9fafb;
+  --color-bg-badge: #f3f4f6;
+}
+
+/* Utility classes for HTTP methods */
+.method-get { background-color: var(--color-get); }
+.method-post { background-color: var(--color-post); }
+.method-put { background-color: var(--color-put); }
+.method-delete { background-color: var(--color-delete); }
+.method-patch { background-color: var(--color-patch); }
+.method-head { background-color: var(--color-head); }
+.method-options { background-color: var(--color-options); }
+
+.status-200 { background-color: var(--color-success); }
+.status-2xx { background-color: var(--color-success); }
+.status-4xx { background-color: var(--color-error); }
+.status-5xx { background-color: var(--color-error); }
+.status-3xx { background-color: var(--color-warning); }

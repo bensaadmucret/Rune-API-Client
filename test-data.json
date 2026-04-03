@@ -1,0 +1,321 @@
+{
+  "collections": [
+    {
+      "id": "col-001",
+      "name": "Notion API",
+      "description": "API endpoints for Notion integration",
+      "color": "#3b82f6",
+      "folders": [
+        {
+          "id": "folder-001",
+          "name": "Databases",
+          "requests": [
+            {
+              "id": "req-001",
+              "name": "Retrieve a database",
+              "method": "GET",
+              "url": "https://api.notion.com/v1/databases/{{DATABASE_ID}}",
+              "headers": [
+                { "key": "Authorization", "value": "Bearer {{NOTION_TOKEN}}", "enabled": true },
+                { "key": "Notion-Version", "value": "2022-06-28", "enabled": true }
+              ],
+              "bodyType": "none",
+              "createdAt": 1712143200000,
+              "updatedAt": 1712143200000
+            },
+            {
+              "id": "req-002",
+              "name": "Query a database",
+              "method": "POST",
+              "url": "https://api.notion.com/v1/databases/{{DATABASE_ID}}/query",
+              "headers": [
+                { "key": "Authorization", "value": "Bearer {{NOTION_TOKEN}}", "enabled": true },
+                { "key": "Content-Type", "value": "application/json", "enabled": true }
+              ],
+              "bodyType": "raw",
+              "body": "{\n  \"filter\": {\n    \"property\": \"Status\",\n    \"select\": {\n      \"equals\": \"Active\"\n    }\n  }\n}",
+              "createdAt": 1712143300000,
+              "updatedAt": 1712143300000
+            }
+          ],
+          "createdAt": 1712143200000,
+          "updatedAt": 1712143200000
+        },
+        {
+          "id": "folder-002",
+          "name": "Pages",
+          "requests": [
+            {
+              "id": "req-003",
+              "name": "Create a page",
+              "method": "POST",
+              "url": "https://api.notion.com/v1/pages",
+              "headers": [
+                { "key": "Authorization", "value": "Bearer {{NOTION_TOKEN}}", "enabled": true },
+                { "key": "Content-Type", "value": "application/json", "enabled": true }
+              ],
+              "bodyType": "raw",
+              "body": "{\n  \"parent\": {\n    \"database_id\": \"{{DATABASE_ID}}\"\n  },\n  \"properties\": {\n    \"Name\": {\n      \"title\": [{\n        \"text\": {\n          \"content\": \"New Task\"\n        }\n      }]\n    }\n  }\n}",
+              "createdAt": 1712143400000,
+              "updatedAt": 1712143400000
+            }
+          ],
+          "createdAt": 1712143400000,
+          "updatedAt": 1712143400000
+        }
+      ],
+      "requests": [],
+      "createdAt": 1712143200000,
+      "updatedAt": 1712143200000
+    },
+    {
+      "id": "col-002",
+      "name": "GitHub API",
+      "description": "GitHub REST API endpoints",
+      "color": "#22c55e",
+      "folders": [
+        {
+          "id": "folder-003",
+          "name": "Repositories",
+          "requests": [
+            {
+              "id": "req-004",
+              "name": "Get repo info",
+              "method": "GET",
+              "url": "https://api.github.com/repos/{{owner}}/{{repo}}",
+              "headers": [
+                { "key": "Accept", "value": "application/vnd.github+json", "enabled": true },
+                { "key": "Authorization", "value": "Bearer {{GITHUB_TOKEN}}", "enabled": true }
+              ],
+              "bodyType": "none",
+              "createdAt": 1712230000000,
+              "updatedAt": 1712230000000
+            },
+            {
+              "id": "req-005",
+              "name": "List issues",
+              "method": "GET",
+              "url": "https://api.github.com/repos/{{owner}}/{{repo}}/issues?state=open&per_page=10",
+              "headers": [
+                { "key": "Accept", "value": "application/vnd.github+json", "enabled": true }
+              ],
+              "bodyType": "none",
+              "createdAt": 1712230100000,
+              "updatedAt": 1712230100000
+            }
+          ],
+          "createdAt": 1712230000000,
+          "updatedAt": 1712230000000
+        }
+      ],
+      "requests": [],
+      "createdAt": 1712230000000,
+      "updatedAt": 1712230000000
+    }
+  ],
+  
+  "environments": [
+    {
+      "id": "env-001",
+      "name": "Development",
+      "variables": [
+        { "key": "BASE_URL", "value": "http://localhost:3000", "type": "default" },
+        { "key": "API_KEY", "value": "dev-key-12345", "type": "secret" },
+        { "key": "DATABASE_ID", "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "type": "default" },
+        { "key": "NOTION_TOKEN", "value": "secret_notion_token_here", "type": "secret" },
+        { "key": "GITHUB_TOKEN", "value": "ghp_personal_access_token", "type": "secret" },
+        { "key": "owner", "value": "myusername", "type": "default" },
+        { "key": "repo", "value": "my-project", "type": "default" }
+      ],
+      "isGlobal": false
+    },
+    {
+      "id": "env-002",
+      "name": "Production",
+      "variables": [
+        { "key": "BASE_URL", "value": "https://api.example.com", "type": "default" },
+        { "key": "API_KEY", "value": "prod-key-98765", "type": "secret" },
+        { "key": "DATABASE_ID", "value": "prod-db-id-12345", "type": "default" },
+        { "key": "NOTION_TOKEN", "value": "secret_prod_notion_token", "type": "secret" }
+      ],
+      "isGlobal": false
+    }
+  ],
+  
+  "history": [
+    {
+      "id": "hist-001",
+      "request": {
+        "id": "req-hist-001",
+        "name": "Get users list",
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/users",
+        "headers": [
+          { "key": "Accept", "value": "application/json", "enabled": true }
+        ],
+        "bodyType": "none"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "max-age=43200",
+          "content-length": "5645"
+        },
+        "body": "[{\n  \"id\": 1,\n  \"name\": \"Leanne Graham\",\n  \"username\": \"Bret\",\n  \"email\": \"Sincere@april.biz\",\n  \"address\": {\n    \"street\": \"Kulas Light\",\n    \"suite\": \"Apt. 556\",\n    \"city\": \"Gwenborough\",\n    \"zipcode\": \"92998-3874\"\n  },\n  \"phone\": \"1-770-736-8031 x56442\",\n  \"website\": \"hildegard.org\"\n},{\n  \"id\": 2,\n  \"name\": \"Ervin Howell\",\n  \"username\": \"Antonette\",\n  \"email\": \"Shanna@melissa.tv\",\n  \"address\": {\n    \"street\": \"Victor Plains\",\n    \"suite\": \"Suite 879\",\n    \"city\": \"Wisokyburgh\",\n    \"zipcode\": \"90566-7771\"\n  },\n  \"phone\": \"010-692-6593 x09125\",\n  \"website\": \"anastasia.net\"\n}]",
+        "contentType": "application/json",
+        "size": 5645,
+        "time": 145,
+        "timestamp": 1712230500000
+      },
+      "executedAt": 1712230500000
+    },
+    {
+      "id": "hist-002",
+      "request": {
+        "id": "req-hist-002",
+        "name": "Create new post",
+        "method": "POST",
+        "url": "https://jsonplaceholder.typicode.com/posts",
+        "headers": [
+          { "key": "Content-Type", "value": "application/json", "enabled": true }
+        ],
+        "bodyType": "raw",
+        "body": "{\n  \"title\": \"Test Post\",\n  \"body\": \"This is a test post body\",\n  \"userId\": 1\n}"
+      },
+      "response": {
+        "status": 201,
+        "statusText": "Created",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "location": "https://jsonplaceholder.typicode.com/posts/101"
+        },
+        "body": "{\n  \"title\": \"Test Post\",\n  \"body\": \"This is a test post body\",\n  \"userId\": 1,\n  \"id\": 101\n}",
+        "contentType": "application/json",
+        "size": 87,
+        "time": 89,
+        "timestamp": 1712230600000
+      },
+      "executedAt": 1712230600000
+    },
+    {
+      "id": "hist-003",
+      "request": {
+        "id": "req-hist-003",
+        "name": "Update user",
+        "method": "PUT",
+        "url": "https://jsonplaceholder.typicode.com/users/1",
+        "headers": [
+          { "key": "Content-Type", "value": "application/json", "enabled": true }
+        ],
+        "bodyType": "raw",
+        "body": "{\n  \"name\": \"John Doe Updated\",\n  \"email\": \"john.updated@example.com\"\n}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": "{\n  \"id\": 1,\n  \"name\": \"John Doe Updated\",\n  \"email\": \"john.updated@example.com\"\n}",
+        "contentType": "application/json",
+        "size": 98,
+        "time": 67,
+        "timestamp": 1712230700000
+      },
+      "executedAt": 1712230700000
+    },
+    {
+      "id": "hist-004",
+      "request": {
+        "id": "req-hist-004",
+        "name": "Delete post",
+        "method": "DELETE",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": [],
+        "bodyType": "none"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "OK",
+        "headers": {},
+        "body": "{}",
+        "contentType": "application/json",
+        "size": 2,
+        "time": 45,
+        "timestamp": 1712230800000
+      },
+      "executedAt": 1712230800000
+    },
+    {
+      "id": "hist-005",
+      "request": {
+        "id": "req-hist-005",
+        "name": "Get todos",
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos?_limit=5",
+        "headers": [],
+        "bodyType": "none"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "x-ratelimit-remaining": "99",
+          "x-ratelimit-limit": "100"
+        },
+        "body": "[{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"delectus aut autem\",\n  \"completed\": false\n},{\n  \"userId\": 1,\n  \"id\": 2,\n  \"title\": \"quis ut nam facilis et officia qui\",\n  \"completed\": false\n},{\n  \"userId\": 1,\n  \"id\": 3,\n  \"title\": \"fugiat veniam minus\",\n  \"completed\": false\n}]",
+        "contentType": "application/json",
+        "size": 245,
+        "time": 78,
+        "timestamp": 1712230900000
+      },
+      "executedAt": 1712230900000
+    },
+    {
+      "id": "hist-006",
+      "request": {
+        "id": "req-hist-006",
+        "name": "Error test - 404",
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/99999",
+        "headers": [],
+        "bodyType": "none"
+      },
+      "response": {
+        "status": 404,
+        "statusText": "Not Found",
+        "headers": {},
+        "body": "{}",
+        "contentType": "application/json",
+        "size": 2,
+        "time": 34,
+        "timestamp": 1712231000000
+      },
+      "executedAt": 1712231000000
+    },
+    {
+      "id": "hist-007",
+      "request": {
+        "id": "req-hist-007",
+        "name": "Get comments",
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1/comments",
+        "headers": [],
+        "bodyType": "none"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "OK",
+        "headers": {},
+        "body": "[{\n  \"postId\": 1,\n  \"id\": 1,\n  \"name\": \"id labore ex et quam laborum\",\n  \"email\": \"Eliseo@gardner.biz\",\n  \"body\": \"laudantium enim quasi est quidem magnam voluptate ipsam eos\\ntempora quo necessitatibus\\ndolor quam autem quasi\\nreiciendis et nam sapiente accusantium\"\n}]",
+        "contentType": "application/json",
+        "size": 456,
+        "time": 112,
+        "timestamp": 1712231100000
+      },
+      "executedAt": 1712231100000
+    }
+  ]
+}

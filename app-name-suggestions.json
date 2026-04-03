@@ -1,0 +1,53 @@
+{
+  "name": "Rune API Client",
+  "version": "1.0.0",
+  "description": "A powerful API testing client built with Tauri, Vue.js, and Rust",
+  
+  "suggestions": [
+    {
+      "name": "Rune",
+      "tagline": "Forge your API requests",
+      "inspiration": "Runes are ancient symbols of power and communication - perfect for an API tool"
+    },
+    {
+      "name": "Aether",
+      "tagline": "Connect to the digital ether",
+      "inspiration": "Aether represents the medium through which API requests travel"
+    },
+    {
+      "name": "Quill",
+      "tagline": "Write your API story",
+      "inspiration": "Quill is a writing instrument - APIs are how we write to web services"
+    },
+    {
+      "name": "Volt",
+      "tagline": "Lightning fast API testing",
+      "inspiration": "Speed and power of electricity"
+    },
+    {
+      "name": "Pylon",
+      "tagline": "Your API gateway",
+      "inspiration": "Pylons are structures that support and connect"
+    },
+    {
+      "name": "Prism",
+      "tagline": "See your APIs clearly",
+      "inspiration": "Prisms refract light into colors - the tool refracts APIs into clarity"
+    },
+    {
+      "name": "Flux",
+      "tagline": "Flow through APIs effortlessly",
+      "inspiration": "Flux represents flow and movement of data"
+    },
+    {
+      "name": "Catalyst",
+      "tagline": "Accelerate your development",
+      "inspiration": "Catalysts speed up reactions - this tool speeds up API testing"
+    }
+  ],
+  
+  "recommended": {
+    "name": "Rune",
+    "reason": "Short, memorable, unique, relates to both Norse mythology (power/symbols) and Rust (the programming language). The tagline 'Forge your API requests' connects to both the mythological and technical aspects."
+  }
+}
