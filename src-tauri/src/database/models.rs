@@ -130,3 +130,23 @@ pub struct AddHistoryRequest {
     pub request: RequestData,
     pub response: Option<ResponseData>,
 }
+
+// For header presets
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct HeaderPreset {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub headers: Vec<HttpHeader>,
+    pub is_builtin: i64,
+    pub created_at: i64,
+    pub updated_at: i64,
+}
+
+// For creating/updating header presets
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateHeaderPresetRequest {
+    pub name: String,
+    pub description: Option<String>,
+    pub headers: Vec<HttpHeader>,
+}

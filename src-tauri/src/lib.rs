@@ -183,6 +183,10 @@ pub fn run() {
             database::commands::add_history,
             database::commands::clear_history,
             database::commands::delete_history_entry,
+            database::commands::get_header_presets,
+            database::commands::create_header_preset,
+            database::commands::update_header_preset,
+            database::commands::delete_header_preset,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

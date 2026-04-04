@@ -486,3 +486,99 @@ pub async fn delete_history_entry(db: State<'_, Database>, id: String) -> Result
 
     Ok(())
 }
+
+// Header Preset Commands
+#[tauri::command]
+pub async fn get_header_presets(db: State<'_, Database>) -> Result<Vec<HeaderPreset>, String> {
+    let rows = sqlx::query("SELECT * FROM header_presets ORDER BY is_builtin DESC, name")
+        .fetch_all(&db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let mut presets = Vec::new();
+    for row in rows {
+        let headers_json: String = row.get("headers");
+        let headers: Vec<HttpHeader> = serde_json::from_str(&headers_json).unwrap_or_default();
+
+        presets.push(HeaderPreset {
+            id: row.get("id"),
+            name: row.get("name"),
+            description: row.get("description"),
+            headers,
+            is_builtin: row.get("is_builtin"),
+            created_at: row.get("created_at"),
+            updated_at: row.get("updated_at"),
+        });
+    }
+
+    Ok(presets)
+}
+
+#[tauri::command]
+pub async fn create_header_preset(
+    db: State<'_, Database>,
+    req: CreateHeaderPresetRequest,
+) -> Result<HeaderPreset, String> {
+    let id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().timestamp_millis();
+    let headers_json = serde_json::to_string(&req.headers).map_err(|e| e.to_string())?;
+
+    sqlx::query(
+        "INSERT INTO header_presets (id, name, description, headers, is_builtin, created_at, updated_at) VALUES (?, ?, ?, ?, 0, ?, ?)"
+    )
+    .bind(&id)
+    .bind(&req.name)
+    .bind(&req.description)
+    .bind(&headers_json)
+    .bind(now)
+    .bind(now)
+    .execute(&db.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(HeaderPreset {
+        id,
+        name: req.name,
+        description: req.description,
+        headers: req.headers,
+        is_builtin: 0,
+        created_at: now,
+        updated_at: now,
+    })
+}
+
+#[tauri::command]
+pub async fn update_header_preset(
+    db: State<'_, Database>,
+    id: String,
+    req: CreateHeaderPresetRequest,
+) -> Result<(), String> {
+    let now = chrono::Utc::now().timestamp_millis();
+    let headers_json = serde_json::to_string(&req.headers).map_err(|e| e.to_string())?;
+
+    sqlx::query(
+        "UPDATE header_presets SET name = ?, description = ?, headers = ?, updated_at = ? WHERE id = ? AND is_builtin = 0"
+    )
+    .bind(&req.name)
+    .bind(&req.description)
+    .bind(&headers_json)
+    .bind(now)
+    .bind(&id)
+    .execute(&db.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn delete_header_preset(db: State<'_, Database>, id: String) -> Result<(), String> {
+    // Only delete non-builtin presets
+    sqlx::query("DELETE FROM header_presets WHERE id = ? AND is_builtin = 0")
+        .bind(&id)
+        .execute(&db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}

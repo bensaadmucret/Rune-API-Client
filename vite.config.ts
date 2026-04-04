@@ -30,4 +30,12 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    include: ['tests/**/*.{test,spec}.{js,ts}'],
+    deps: {
+      inline: ['@vue'],
+    },
+  },
 }));

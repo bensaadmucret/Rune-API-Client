@@ -134,6 +134,50 @@ impl Database {
 
         sqlx::query(
             r#"
+            CREATE TABLE IF NOT EXISTS header_presets (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT,
+                headers TEXT NOT NULL DEFAULT '[]',
+                is_builtin INTEGER NOT NULL DEFAULT 0,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL
+            )
+            "#,
+        )
+        .execute(pool)
+        .await?;
+
+        // Insert default presets if table is empty
+        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM header_presets")
+            .fetch_one(pool)
+            .await?;
+
+        if count == 0 {
+            let now = chrono::Utc::now().timestamp_millis();
+            let presets = vec![
+                ("json_api", "JSON API", "Content-Type: application/json, Accept: application/json", "[{\"key\":\"Content-Type\",\"value\":\"application/json\",\"enabled\":true},{\"key\":\"Accept\",\"value\":\"application/json\",\"enabled\":true}]"),
+                ("auth_bearer", "Auth Bearer", "Authorization header with Bearer token", "[{\"key\":\"Authorization\",\"value\":\"Bearer {{token}}\",\"enabled\":true}]"),
+                ("form_data", "Form Data", "Content-Type for multipart/form-data", "[{\"key\":\"Content-Type\",\"value\":\"multipart/form-data\",\"enabled\":true}]"),
+            ];
+
+            for (id, name, desc, headers) in presets {
+                sqlx::query(
+                    "INSERT INTO header_presets (id, name, description, headers, is_builtin, created_at, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?)"
+                )
+                .bind(id)
+                .bind(name)
+                .bind(desc)
+                .bind(headers)
+                .bind(now)
+                .bind(now)
+                .execute(pool)
+                .await?;
+            }
+        }
+
+        sqlx::query(
+            r#"
             CREATE TABLE IF NOT EXISTS app_settings (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL

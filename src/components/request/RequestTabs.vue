@@ -2,21 +2,18 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRequestStore } from '../../stores/request';
+import { useHeaderPresetStore, type HttpHeader } from '../../stores/headerPresets';
+import HeaderAutocomplete from './HeaderAutocomplete.vue';
+import HeaderValueAutocomplete from './HeaderValueAutocomplete.vue';
+import HeaderPresetManager from './HeaderPresetManager.vue';
 
 const { t } = useI18n();
 const requestStore = useRequestStore();
+const headerPresetStore = useHeaderPresetStore();
 
 const activeTab = ref<'headers' | 'body' | 'params' | 'auth'>('headers');
-
-const commonHeaders = [
-  'Accept',
-  'Accept-Encoding',
-  'Accept-Language',
-  'Authorization',
-  'Content-Type',
-  'User-Agent',
-  'Cache-Control',
-];
+const showPresetManager = ref(false);
+const showPresetDropdown = ref(false);
 
 function addHeader() {
   requestStore.addHeader({ key: '', value: '' });
@@ -28,6 +25,14 @@ function toggleHeader(index: number) {
     header.enabled = !header.enabled;
     requestStore.setHeaders([...requestStore.currentRequest.headers]);
   }
+}
+
+function applyPreset(headers: HttpHeader[]) {
+  // Add preset headers to existing headers
+  const existingHeaders = requestStore.currentRequest.headers;
+  const newHeaders = headers.map(h => ({ ...h, enabled: true }));
+  requestStore.setHeaders([...existingHeaders, ...newHeaders]);
+  showPresetDropdown.value = false;
 }
 
 // Query Params
@@ -254,6 +259,82 @@ function applyBasicAuth() {
     <div class="flex-1 p-4 overflow-y-auto">
       <!-- Headers Tab -->
       <div v-if="activeTab === 'headers'" class="space-y-2">
+        <!-- Header Presets Bar -->
+        <div class="flex items-center gap-2 mb-3">
+          <div class="relative">
+            <button
+              class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-[#f3f4f6] hover:bg-[#e5e7eb] text-[#374151] rounded-md transition-colors"
+              @click="showPresetDropdown = !showPresetDropdown"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              {{ t('requestTabs.presets') || 'Presets' }}
+              <svg
+                :class="['w-4 h-4 transition-transform', showPresetDropdown ? 'rotate-180' : '']"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- Preset Dropdown -->
+            <div
+              v-if="showPresetDropdown && headerPresetStore.allPresets.length > 0"
+              class="absolute top-full left-0 mt-1 w-56 bg-white border border-[#e5e7eb] rounded-md shadow-lg z-50"
+            >
+              <div v-if="headerPresetStore.builtinPresets.length > 0" class="py-1">
+                <div class="px-3 py-1 text-xs font-medium text-[#6b7280] uppercase">
+                  {{ t('requestTabs.builtIn') || 'Built-in' }}
+                </div>
+                <button
+                  v-for="preset in headerPresetStore.builtinPresets"
+                  :key="preset.id"
+                  class="w-full px-3 py-2 text-sm text-left text-[#374151] hover:bg-[#f3f4f6] transition-colors"
+                  @click="applyPreset(preset.headers)"
+                >
+                  <div class="font-medium">{{ preset.name }}</div>
+                  <div class="text-xs text-[#9ca3af]">{{ preset.headers.length }} headers</div>
+                </button>
+              </div>
+              <div v-if="headerPresetStore.customPresets.length > 0" class="border-t border-[#e5e7eb] py-1">
+                <div class="px-3 py-1 text-xs font-medium text-[#6b7280] uppercase">
+                  {{ t('requestTabs.custom') || 'Custom' }}
+                </div>
+                <button
+                  v-for="preset in headerPresetStore.customPresets"
+                  :key="preset.id"
+                  class="w-full px-3 py-2 text-sm text-left text-[#374151] hover:bg-[#f3f4f6] transition-colors"
+                  @click="applyPreset(preset.headers)"
+                >
+                  <div class="font-medium">{{ preset.name }}</div>
+                  <div class="text-xs text-[#9ca3af]">{{ preset.headers.length }} headers</div>
+                </button>
+              </div>
+            </div>
+            <div
+              v-else-if="showPresetDropdown"
+              class="absolute top-full left-0 mt-1 w-56 bg-white border border-[#e5e7eb] rounded-md shadow-lg z-50 p-4 text-center"
+            >
+              <p class="text-sm text-[#6b7280]">{{ t('requestTabs.noPresets') || 'No presets yet' }}</p>
+            </div>
+          </div>
+
+          <button
+            class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors"
+            @click="showPresetManager = true"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {{ t('requestTabs.managePresets') || 'Manage Presets' }}
+          </button>
+        </div>
+
+        <!-- Header Rows -->
         <div
           v-for="(header, index) in requestStore.currentRequest.headers"
           :key="index"
@@ -272,21 +353,20 @@ function applyBasicAuth() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
           </button>
-          <input
+          <HeaderAutocomplete
             v-model="header.key"
-            type="text"
-            list="common-headers"
             placeholder="Header"
-            class="flex-1 px-3 py-1.5 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
+            @select="(suggestion) => {
+              // When header is selected, focus on value if empty
+              if (!header.value && suggestion.commonValues?.length) {
+                header.value = suggestion.commonValues[0];
+              }
+            }"
           />
-          <datalist id="common-headers">
-            <option v-for="h in commonHeaders" :key="h" :value="h" />
-          </datalist>
-          <input
+          <HeaderValueAutocomplete
             v-model="header.value"
-            type="text"
+            :header-key="header.key"
             placeholder="Value"
-            class="flex-1 px-3 py-1.5 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
           />
           <button
             class="p-1.5 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-md transition-colors"
@@ -561,5 +641,11 @@ function applyBasicAuth() {
         </div>
       </div>
     </div>
+
+    <!-- Header Preset Manager Modal -->
+    <HeaderPresetManager
+      v-model="showPresetManager"
+      @apply="applyPreset"
+    />
   </div>
 </template>
