@@ -11,6 +11,15 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "test:ci": "vitest --run --reporter=verbose",
+    "test:staged": "vitest --run --reporter=verbose",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.{vue,ts,tsx,js,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{vue,ts,tsx,js,css,md}\"",
+    "type-check": "vue-tsc --noEmit",
+    "quality": "npm run lint && npm run type-check && npm run test:ci",
+    "quality:fix": "npm run lint:fix && npm run format",
     "rust:lint": "cd src-tauri && cargo clippy --all-targets --all-features -- -D warnings",
     "rust:lint:fix": "cd src-tauri && cargo clippy --all-targets --all-features --fix -- -D warnings",
     "rust:fmt": "cd src-tauri && cargo fmt",
@@ -20,7 +29,8 @@
     "rust:fix": "npm run rust:fmt && npm run rust:lint:fix",
     "rust:test": "cd src-tauri && cargo test --all-targets --all-features",
     "rust:ci": "npm run rust:fmt:check && npm run rust:lint && npm run rust:test",
-    "quality": "npm run rust:quality"
+    "prepare": "husky",
+    "pre-commit": "lint-staged"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -39,11 +49,27 @@
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.27",
     "happy-dom": "^20.8.9",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "postcss": "^8.5.8",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint-plugin-vue": "^9.0.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "~5.6.2",
+    "typescript-eslint": "^7.0.0",
     "vite": "^6.0.3",
     "vitest": "^4.1.2",
     "vue-tsc": "^2.1.10"
+  },
+  "lint-staged": {
+    "*.{vue,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,css,md}": [
+      "prettier --write"
+    ]
   }
 }

@@ -1,0 +1,8 @@
+{
+  "name": "rune-api-client-wiki",
+  "version": "1.0.0",
+  "description": "Publication automatique du wiki GitHub",
+  "scripts": {
+    "publish:wiki": "node scripts/publish-wiki.js"
+  }
+}

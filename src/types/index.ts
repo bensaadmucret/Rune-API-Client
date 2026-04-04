@@ -6,6 +6,8 @@ export interface HttpHeader {
   key: string;
   value: string;
   enabled: boolean;
+  description?: string;
+  showDescription?: boolean;
 }
 
 export interface HttpRequest {

@@ -6,6 +6,7 @@ export interface HttpHeader {
   key: string;
   value: string;
   enabled: boolean;
+  description?: string;
 }
 
 export interface HeaderPreset {
@@ -73,15 +74,15 @@ export const useHeaderPresetStore = defineStore('headerPresets', () => {
     try {
       await invoke('update_header_preset', { id, req });
       const index = presets.value.findIndex(p => p.id === id);
-      
+
       if (index === -1) {
         throw new Error('Preset not found');
       }
-      
+
       if (presets.value[index].is_builtin === 1) {
         throw new Error('Cannot update builtin');
       }
-      
+
       presets.value[index] = {
         ...presets.value[index],
         ...req,
@@ -103,7 +104,7 @@ export const useHeaderPresetStore = defineStore('headerPresets', () => {
       const preset = presets.value.find(p => p.id === id);
       if (!preset) throw new Error('Preset not found');
       if (preset.is_builtin === 1) throw new Error('Cannot delete builtin');
-      
+
       await invoke('delete_header_preset', { id });
       presets.value = presets.value.filter(p => p.id !== id);
     } catch (e) {

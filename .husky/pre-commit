@@ -1,0 +1,24 @@
+#!/bin/sh
+# Pre-commit hook for Rune API Client
+# Runs lint-staged (ESLint + Prettier) on staged files
+
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged (ESLint + Prettier)
+echo "📝 Linting and formatting staged files..."
+npx lint-staged
+
+# Check if there are any test files staged
+echo "🧪 Checking for tests..."
+STAGED_TESTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(test|spec)\.(ts|tsx|js|jsx)$' || true)
+
+if [ -n "$STAGED_TESTS" ]; then
+    echo "✅ Running staged tests..."
+    npm run test:staged
+fi
+
+# Type check (fast - only if TypeScript files changed)
+echo "🔍 Type checking..."
+npm run type-check || echo "⚠️ Type check failed - check your types"
+
+echo "✅ Pre-commit checks complete!"

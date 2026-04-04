@@ -1,7 +1,13 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { invoke } from '@tauri-apps/api/core';
-import type { HttpRequest, HttpResponse, HttpMethod, HttpHeader, RequestExecutionResult } from '../types';
+import type {
+  HttpRequest,
+  HttpResponse,
+  HttpMethod,
+  HttpHeader,
+  RequestExecutionResult,
+} from '../types';
 import { useAppStore } from './app';
 
 export const useRequestStore = defineStore('request', () => {
@@ -46,7 +52,9 @@ export const useRequestStore = defineStore('request', () => {
     currentRequest.value.updatedAt = Date.now();
   }
 
-  function addHeader(header: Omit<HttpHeader, 'enabled'> & { enabled?: boolean }) {
+  function addHeader(
+    header: Omit<HttpHeader, 'enabled'> & { enabled?: boolean; description?: string }
+  ) {
     currentRequest.value.headers.push({
       ...header,
       enabled: header.enabled ?? true,
@@ -121,7 +129,7 @@ export const useRequestStore = defineStore('request', () => {
         key: substituteVariables(h.key),
         value: substituteVariables(h.value),
       }));
-      const substitutedBody = currentRequest.value.body 
+      const substitutedBody = currentRequest.value.body
         ? substituteVariables(currentRequest.value.body)
         : null;
 

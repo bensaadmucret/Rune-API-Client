@@ -1,0 +1,23 @@
+#!/bin/sh
+# Pre-push hook - run full test suite before pushing
+
+echo "🚀 Running pre-push checks..."
+
+# Run all tests
+echo "🧪 Running full test suite..."
+npm run test:ci || {
+    echo "❌ Tests failed - push aborted"
+    exit 1
+}
+
+# Check Rust code if src-tauri changed
+echo "🔧 Checking Rust code..."
+if git diff --cached --name-only | grep -q "^src-tauri/"; then
+    echo "🦀 Rust files changed - running cargo check..."
+    npm run rust:check || {
+        echo "❌ Rust check failed - push aborted"
+        exit 1
+    }
+fi
+
+echo "✅ Pre-push checks complete - pushing..."

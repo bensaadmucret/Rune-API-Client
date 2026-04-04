@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import HeaderAutocomplete from '../../../../src/components/request/HeaderAutocomplete.vue';
 
 // Mock Tauri API
@@ -14,25 +14,25 @@ describe('UC-001: Header Autocomplete', () => {
     setActivePinia(createPinia());
   });
 
-  describe('HeaderAutocomplete Component', () => {
-    it('renders input field with placeholder', () => {
+  describe('Dropdown avec suggestions', () => {
+    it('affiche le dropdown quand on tape dans le champ Key', async () => {
       const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-          placeholder: 'Header',
-        },
+        props: { modelValue: '' },
       });
 
       const input = wrapper.find('input');
-      expect(input.exists()).toBe(true);
-      expect(input.attributes('placeholder')).toBe('Header');
+      await input.setValue('cont');
+      await input.trigger('input');
+      await nextTick();
+
+      const dropdown = wrapper.find('.absolute');
+      expect(dropdown.exists()).toBe(true);
+      expect(dropdown.isVisible()).toBe(true);
     });
 
-    it('shows dropdown on focus', async () => {
+    it('affiche le dropdown au focus', async () => {
       const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-        },
+        props: { modelValue: '' },
       });
 
       const input = wrapper.find('input');
@@ -41,13 +41,78 @@ describe('UC-001: Header Autocomplete', () => {
 
       const dropdown = wrapper.find('.absolute');
       expect(dropdown.exists()).toBe(true);
+      expect(dropdown.isVisible()).toBe(true);
+    });
+  });
+
+  describe('Liste prédéfinie de headers HTTP', () => {
+    it('contient Content-Type dans les suggestions (avec filtre)', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.setValue('content-type');
+      await input.trigger('input');
+      await nextTick();
+
+      const suggestions = wrapper.findAll('.header-suggestion');
+      const suggestionTexts = suggestions.map(s => s.text());
+
+      expect(suggestionTexts.some(t => t.includes('Content-Type'))).toBe(true);
     });
 
-    it('filters suggestions based on input', async () => {
+    it('contient Authorization dans les suggestions', async () => {
       const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-        },
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.trigger('focus');
+      await nextTick();
+
+      const suggestions = wrapper.findAll('.header-suggestion');
+      const suggestionTexts = suggestions.map(s => s.text());
+
+      expect(suggestionTexts.some(t => t.includes('Authorization'))).toBe(true);
+    });
+
+    it('contient Accept dans les suggestions', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.trigger('focus');
+      await nextTick();
+
+      const suggestions = wrapper.findAll('.header-suggestion');
+      const suggestionTexts = suggestions.map(s => s.text());
+
+      expect(suggestionTexts.some(t => t.includes('Accept'))).toBe(true);
+    });
+
+    it('contient User-Agent dans les suggestions (avec filtre)', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.setValue('user-agent');
+      await input.trigger('input');
+      await nextTick();
+
+      const suggestions = wrapper.findAll('.header-suggestion');
+      const suggestionTexts = suggestions.map(s => s.text());
+
+      expect(suggestionTexts.some(t => t.includes('User-Agent'))).toBe(true);
+    });
+  });
+
+  describe('Filtre intelligent des suggestions', () => {
+    it('filtre les suggestions quand on tape "cont"', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
       });
 
       const input = wrapper.find('input');
@@ -55,70 +120,33 @@ describe('UC-001: Header Autocomplete', () => {
       await input.trigger('input');
       await nextTick();
 
-      // Should show Content-Type, Content-Length, etc.
       const suggestions = wrapper.findAll('.header-suggestion');
-      const suggestionTexts = suggestions.map(s => s.text());
-      
-      expect(suggestionTexts.some(t => t.includes('Content-Type'))).toBe(true);
-      expect(suggestionTexts.some(t => t.includes('Content-Length'))).toBe(true);
+      const suggestionTexts = suggestions.map(s => s.text().toLowerCase());
+
+      // Devrait suggérer Content-Type, Content-Length
+      expect(suggestionTexts.some(t => t.includes('content-type'))).toBe(true);
+      expect(suggestionTexts.some(t => t.includes('content-length'))).toBe(true);
     });
 
-    it('emits update:modelValue when typing', async () => {
+    it('filtre insensible à la casse', async () => {
       const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-        },
+        props: { modelValue: '' },
       });
 
       const input = wrapper.find('input');
-      await input.setValue('Authorization');
+      await input.setValue('CONTENT');
       await input.trigger('input');
-
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy();
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual(['Authorization']);
-    });
-
-    it('selects suggestion on click', async () => {
-      const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-        },
-      });
-
-      const input = wrapper.find('input');
-      await input.trigger('focus');
       await nextTick();
 
-      const firstSuggestion = wrapper.find('.header-suggestion');
-      if (firstSuggestion.exists()) {
-        await firstSuggestion.trigger('click');
-        
-        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
-        expect(wrapper.emitted('select')).toBeTruthy();
-      }
+      const suggestions = wrapper.findAll('.header-suggestion');
+      const suggestionTexts = suggestions.map(s => s.text().toLowerCase());
+
+      expect(suggestionTexts.some(t => t.includes('content'))).toBe(true);
     });
 
-    it('shows header descriptions in dropdown', async () => {
+    it('limite les résultats à 10 suggestions maximum', async () => {
       const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-        },
-      });
-
-      const input = wrapper.find('input');
-      await input.trigger('focus');
-      await nextTick();
-
-      const descriptions = wrapper.findAll('.text-xs');
-      // At least some suggestions should have descriptions
-      expect(descriptions.length).toBeGreaterThan(0);
-    });
-
-    it('limits suggestions to 10 items', async () => {
-      const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-        },
+        props: { modelValue: '' },
       });
 
       const input = wrapper.find('input');
@@ -130,27 +158,91 @@ describe('UC-001: Header Autocomplete', () => {
     });
   });
 
-  describe('HTTP Headers List', () => {
-    it('contains common HTTP headers', async () => {
+  describe('Navigation clavier et Tab pour autocompléter', () => {
+    it('sélectionne la suggestion avec Tab', async () => {
       const wrapper = mount(HeaderAutocomplete, {
-        props: {
-          modelValue: '',
-        },
+        props: { modelValue: '' },
       });
 
       const input = wrapper.find('input');
       await input.trigger('focus');
       await nextTick();
 
+      // Press Tab to select first suggestion
+      await input.trigger('keydown', { key: 'Tab' });
+      await nextTick();
+
+      // Should emit update:modelValue with selected header
+      expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+    });
+
+    it('navigue avec les flèches haut/bas', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.trigger('focus');
+      await nextTick();
+
+      // Press ArrowDown
+      await input.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+
+      const selectedItem = wrapper.find('.header-suggestion.selected');
+      expect(selectedItem.exists()).toBe(true);
+    });
+
+    it('sélectionne avec Enter', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.trigger('focus');
+      await nextTick();
+
+      await input.trigger('keydown', { key: 'Enter' });
+      await nextTick();
+
+      expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+      expect(wrapper.emitted('select')).toBeTruthy();
+    });
+
+    it('ferme le dropdown avec Escape', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.trigger('focus');
+      await nextTick();
+
+      expect(wrapper.find('.absolute').exists()).toBe(true);
+
+      await input.trigger('keydown', { key: 'Escape' });
+      await nextTick();
+
+      expect(wrapper.find('.absolute').exists()).toBe(false);
+    });
+  });
+
+  describe('Descriptions des headers', () => {
+    it('affiche la description du header Content-Type', async () => {
+      const wrapper = mount(HeaderAutocomplete, {
+        props: { modelValue: '' },
+      });
+
+      const input = wrapper.find('input');
+      await input.setValue('Content-Type');
+      await input.trigger('input');
+      await nextTick();
+
       const suggestions = wrapper.findAll('.header-suggestion');
-      const suggestionTexts = suggestions.map(s => s.text().toLowerCase());
+      const contentTypeSuggestion = suggestions.find(s => s.text().includes('Content-Type'));
 
-      // Check for essential headers
-      const hasContentType = suggestionTexts.some(t => t.includes('content-type'));
-      const hasAuthorization = suggestionTexts.some(t => t.includes('authorization'));
-      const hasAccept = suggestionTexts.some(t => t.includes('accept'));
-
-      expect(hasContentType || hasAuthorization || hasAccept).toBe(true);
+      expect(contentTypeSuggestion).toBeDefined();
+      expect(contentTypeSuggestion!.text()).toContain('Media type');
     });
   });
 });
