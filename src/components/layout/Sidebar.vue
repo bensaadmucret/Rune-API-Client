@@ -9,7 +9,6 @@ import CreateFolderModal from '../modals/CreateFolderModal.vue';
 import CreateEnvironmentModal from '../modals/CreateEnvironmentModal.vue';
 import EnvironmentVariables from './EnvironmentVariables.vue';
 import LanguageSelector from './LanguageSelector.vue';
-import LoadTestData from './LoadTestData.vue';
 import type { HttpRequest } from '../../types';
 
 const { t } = useI18n();
@@ -65,7 +64,16 @@ function deleteHistoryEntry(event: Event, entryId: string) {
 
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '.' + String(date.getMilliseconds()).padStart(3, '0');
+  return (
+    date.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }) +
+    '.' +
+    String(date.getMilliseconds()).padStart(3, '0')
+  );
 }
 </script>
 
@@ -78,7 +86,7 @@ function formatTime(timestamp: number): string {
           'flex-1 py-3 text-sm font-medium transition-colors',
           appStore.sidebarActiveTab === 'collections'
             ? 'text-[#3b82f6] border-b-2 border-[#3b82f6]'
-            : 'text-[#6b7280] hover:text-[#374151]'
+            : 'text-[#6b7280] hover:text-[#374151]',
         ]"
         @click="appStore.setSidebarTab('collections')"
       >
@@ -89,7 +97,7 @@ function formatTime(timestamp: number): string {
           'flex-1 py-3 text-sm font-medium transition-colors',
           appStore.sidebarActiveTab === 'history'
             ? 'text-[#3b82f6] border-b-2 border-[#3b82f6]'
-            : 'text-[#6b7280] hover:text-[#374151]'
+            : 'text-[#6b7280] hover:text-[#374151]',
         ]"
         @click="appStore.setSidebarTab('history')"
       >
@@ -107,18 +115,33 @@ function formatTime(timestamp: number): string {
             @click="showCreateCollection = true"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             {{ t('sidebar.newCollection') }}
           </button>
           <button
             class="flex items-center justify-center px-3 py-2 bg-[#f3f4f6] text-[#374151] rounded-md hover:bg-[#e5e7eb] transition-colors h-10"
-            @click="showCreateEnvironment = true"
             title="t('common.manageEnvironments')"
+            @click="showCreateEnvironment = true"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
           </button>
         </div>
@@ -129,29 +152,27 @@ function formatTime(timestamp: number): string {
             v-model="appStore.activeEnvironmentId"
             class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
           >
-            <option value="">{{ t('sidebar.noEnvironment') }}</option>
-            <option
-              v-for="env in appStore.environments"
-              :key="env.id"
-              :value="env.id"
-            >
+            <option value="">
+              {{ t('sidebar.noEnvironment') }}
+            </option>
+            <option v-for="env in appStore.environments" :key="env.id" :value="env.id">
               {{ env.name }}
             </option>
           </select>
         </div>
 
         <div v-if="appStore.collections.length === 0" class="mt-8 text-center">
-          <p class="text-sm text-[#6b7280]">{{ t('sidebar.noCollections') }}</p>
-          <p class="text-xs text-[#9ca3af] mt-1">{{ t('sidebar.noCollectionsHint') }}</p>
+          <p class="text-sm text-[#6b7280]">
+            {{ t('sidebar.noCollections') }}
+          </p>
+          <p class="text-xs text-[#9ca3af] mt-1">
+            {{ t('sidebar.noCollectionsHint') }}
+          </p>
         </div>
 
         <div v-else class="mt-4 space-y-1">
           <!-- Collection Tree -->
-          <div
-            v-for="collection in appStore.collections"
-            :key="collection.id"
-            class="rounded-lg"
-          >
+          <div v-for="collection in appStore.collections" :key="collection.id" class="rounded-lg">
             <!-- Collection Header -->
             <div
               class="flex items-center gap-1 p-2 hover:bg-[#f9fafb] rounded-lg cursor-pointer group"
@@ -160,35 +181,52 @@ function formatTime(timestamp: number): string {
               <svg
                 :class="[
                   'w-4 h-4 text-[#6b7280] transition-transform',
-                  expandedCollections.has(collection.id) ? 'rotate-90' : ''
+                  expandedCollections.has(collection.id) ? 'rotate-90' : '',
                 ]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
               <div
                 class="w-3 h-3 rounded-full"
                 :style="{ backgroundColor: collection.color || '#3b82f6' }"
               />
-              <span class="text-sm font-medium text-[#374151] flex-1 truncate">{{ collection.name }}</span>
+              <span class="text-sm font-medium text-[#374151] flex-1 truncate">{{
+                collection.name
+              }}</span>
               <button
                 class="opacity-0 group-hover:opacity-100 p-1 text-[#6b7280] hover:text-[#3b82f6] hover:bg-[#eff6ff] rounded transition-all"
-                @click.stop="openCreateFolder(collection.id)"
                 title="t('common.newFolder')"
+                @click.stop="openCreateFolder(collection.id)"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
               </button>
               <button
                 class="opacity-0 group-hover:opacity-100 p-1 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded transition-all"
-                @click.stop="appStore.removeCollection(collection.id)"
                 title="t('common.deleteCollection')"
+                @click.stop="appStore.removeCollection(collection.id)"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -196,11 +234,7 @@ function formatTime(timestamp: number): string {
             <!-- Collection Content -->
             <div v-if="expandedCollections.has(collection.id)" class="ml-4 mt-1 space-y-1">
               <!-- Folders -->
-              <div
-                v-for="folder in collection.folders"
-                :key="folder.id"
-                class="rounded-lg"
-              >
+              <div v-for="folder in collection.folders" :key="folder.id" class="rounded-lg">
                 <div
                   class="flex items-center gap-1 p-2 hover:bg-[#f9fafb] rounded-lg cursor-pointer group"
                   @click="toggleFolder(folder.id)"
@@ -208,25 +242,45 @@ function formatTime(timestamp: number): string {
                   <svg
                     :class="[
                       'w-4 h-4 text-[#6b7280] transition-transform',
-                      expandedFolders.has(folder.id) ? 'rotate-90' : ''
+                      expandedFolders.has(folder.id) ? 'rotate-90' : '',
                     ]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
-                  <svg class="w-4 h-4 text-[#f59e0b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  <svg
+                    class="w-4 h-4 text-[#f59e0b]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                    />
                   </svg>
                   <span class="text-sm text-[#374151] flex-1 truncate">{{ folder.name }}</span>
                   <button
                     class="opacity-0 group-hover:opacity-100 p-1 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded transition-all"
-                    @click.stop="appStore.removeFolder(collection.id, folder.id)"
                     title="t('common.deleteFolder')"
+                    @click.stop="appStore.removeFolder(collection.id, folder.id)"
                   >
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -251,7 +305,9 @@ function formatTime(timestamp: number): string {
                     >
                       {{ request.method }}
                     </span>
-                    <span class="text-sm text-[#374151] truncate">{{ request.name || request.url }}</span>
+                    <span class="text-sm text-[#374151] truncate">{{
+                      request.name || request.url
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -275,7 +331,9 @@ function formatTime(timestamp: number): string {
                 >
                   {{ request.method }}
                 </span>
-                <span class="text-sm text-[#374151] truncate">{{ request.name || request.url }}</span>
+                <span class="text-sm text-[#374151] truncate">{{
+                  request.name || request.url
+                }}</span>
               </div>
             </div>
           </div>
@@ -285,8 +343,12 @@ function formatTime(timestamp: number): string {
       <!-- History Tab -->
       <div v-else>
         <div v-if="historyStore.history.length === 0" class="mt-8 text-center">
-          <p class="text-sm text-[#6b7280]">{{ t('sidebar.noHistory') }}</p>
-          <p class="text-xs text-[#9ca3af] mt-1">{{ t('sidebar.noHistoryHint') }}</p>
+          <p class="text-sm text-[#6b7280]">
+            {{ t('sidebar.noHistory') }}
+          </p>
+          <p class="text-xs text-[#9ca3af] mt-1">
+            {{ t('sidebar.noHistoryHint') }}
+          </p>
         </div>
 
         <div v-else class="space-y-2">
@@ -309,14 +371,21 @@ function formatTime(timestamp: number): string {
               >
                 {{ entry.request.method }}
               </span>
-              <span class="text-sm text-[#374151] truncate">{{ entry.request.name || entry.request.url }}</span>
+              <span class="text-sm text-[#374151] truncate">{{
+                entry.request.name || entry.request.url
+              }}</span>
               <button
                 class="opacity-0 group-hover:opacity-100 ml-auto p-1 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded transition-all"
-                @click="deleteHistoryEntry($event, entry.id)"
                 title="t('common.deleteFromHistory')"
+                @click="deleteHistoryEntry($event, entry.id)"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -325,12 +394,17 @@ function formatTime(timestamp: number): string {
               <span
                 class="text-xs"
                 :class="{
-                  'text-[#22c55e]': entry.response && entry.response.status >= 200 && entry.response.status < 300,
-                  'text-[#ef4444]': entry.response && (entry.response.status >= 400 || entry.response.status >= 500),
-                  'text-[#f59e0b]': entry.response && entry.response.status >= 300 && entry.response.status < 400,
+                  'text-[#22c55e]':
+                    entry.response && entry.response.status >= 200 && entry.response.status < 300,
+                  'text-[#ef4444]':
+                    entry.response &&
+                    (entry.response.status >= 400 || entry.response.status >= 500),
+                  'text-[#f59e0b]':
+                    entry.response && entry.response.status >= 300 && entry.response.status < 400,
                 }"
               >
-                {{ entry.response?.status || t('common.error') }} {{ entry.response?.statusText || '' }}
+                {{ entry.response?.status || t('common.error') }}
+                {{ entry.response?.statusText || '' }}
               </span>
             </div>
           </div>
@@ -349,22 +423,15 @@ function formatTime(timestamp: number): string {
     <div class="p-3 border-t border-[#e5e7eb] bg-white space-y-2">
       <EnvironmentVariables />
       <LanguageSelector />
-      <LoadTestData />
     </div>
 
     <!-- Modals -->
-    <CreateCollectionModal
-      :show="showCreateCollection"
-      @close="showCreateCollection = false"
-    />
+    <CreateCollectionModal :show="showCreateCollection" @close="showCreateCollection = false" />
     <CreateFolderModal
       :show="showCreateFolder"
       :collection-id="selectedCollectionId"
       @close="showCreateFolder = false"
     />
-    <CreateEnvironmentModal
-      :show="showCreateEnvironment"
-      @close="showCreateEnvironment = false"
-    />
+    <CreateEnvironmentModal :show="showCreateEnvironment" @close="showCreateEnvironment = false" />
   </aside>
 </template>
