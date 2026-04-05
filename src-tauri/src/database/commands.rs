@@ -658,3 +658,98 @@ pub async fn delete_header_preset(db: State<'_, Database>, id: String) -> Result
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_xor_cipher_basic() {
+        let data = b"hello";
+        let key = b"key";
+        let encrypted = xor_cipher(data, key);
+        assert_ne!(encrypted, data.to_vec());
+        
+        let decrypted = xor_cipher(&encrypted, key);
+        assert_eq!(decrypted, data.to_vec());
+    }
+
+    #[test]
+    fn test_xor_cipher_empty_key() {
+        let data = b"hello";
+        let key = b"";
+        let result = xor_cipher(data, key);
+        assert_eq!(result, data.to_vec());
+    }
+
+    #[test]
+    fn test_xor_cipher_longer_key() {
+        let data = b"hi";
+        let key = b"longer_key";
+        let encrypted = xor_cipher(data, key);
+        let decrypted = xor_cipher(&encrypted, key);
+        assert_eq!(decrypted, data.to_vec());
+    }
+
+    #[test]
+    fn test_encrypt_secret_value_basic() {
+        let key = b"testkey123";
+        let value = "secret_password";
+        let encrypted = encrypt_secret_value(value, key);
+        
+        assert!(encrypted.starts_with(SECRET_PREFIX));
+        assert_ne!(encrypted, value);
+    }
+
+    #[test]
+    fn test_encrypt_secret_value_empty() {
+        let key = b"testkey";
+        let encrypted = encrypt_secret_value("", key);
+        assert_eq!(encrypted, "");
+    }
+
+    #[test]
+    fn test_decrypt_secret_value_roundtrip() {
+        let key = b"mysecretkey";
+        let original = "my_secret_value_123";
+        
+        let encrypted = encrypt_secret_value(original, key);
+        let decrypted = decrypt_secret_value(&encrypted, key);
+        
+        assert_eq!(decrypted, original);
+    }
+
+    #[test]
+    fn test_decrypt_secret_value_without_prefix() {
+        let key = b"testkey";
+        let value = "plain_text";
+        
+        let result = decrypt_secret_value(value, key);
+        assert_eq!(result, value);
+    }
+
+    #[test]
+    fn test_decrypt_secret_value_invalid_base64() {
+        let key = b"testkey";
+        let invalid = format!("{}!!!invalid_base64!!!", SECRET_PREFIX);
+        
+        let result = decrypt_secret_value(&invalid, key);
+        assert_eq!(result, invalid);
+    }
+
+    #[test]
+    fn test_encrypt_decrypt_unicode() {
+        let key = b"unicode_key";
+        let value = "日本語テスト🔐";
+        
+        let encrypted = encrypt_secret_value(value, key);
+        let decrypted = decrypt_secret_value(&encrypted, key);
+        
+        assert_eq!(decrypted, value);
+    }
+
+    #[test]
+    fn test_secret_prefix_constant() {
+        assert_eq!(SECRET_PREFIX, "enc:v1:");
+    }
+}

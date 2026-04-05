@@ -191,3 +191,106 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_method_get() {
+        assert_eq!(parse_method("GET"), Method::GET);
+        assert_eq!(parse_method("get"), Method::GET);
+    }
+
+    #[test]
+    fn test_parse_method_post() {
+        assert_eq!(parse_method("POST"), Method::POST);
+        assert_eq!(parse_method("post"), Method::POST);
+    }
+
+    #[test]
+    fn test_parse_method_put() {
+        assert_eq!(parse_method("PUT"), Method::PUT);
+    }
+
+    #[test]
+    fn test_parse_method_delete() {
+        assert_eq!(parse_method("DELETE"), Method::DELETE);
+    }
+
+    #[test]
+    fn test_parse_method_patch() {
+        assert_eq!(parse_method("PATCH"), Method::PATCH);
+    }
+
+    #[test]
+    fn test_parse_method_head() {
+        assert_eq!(parse_method("HEAD"), Method::HEAD);
+    }
+
+    #[test]
+    fn test_parse_method_options() {
+        assert_eq!(parse_method("OPTIONS"), Method::OPTIONS);
+    }
+
+    #[test]
+    fn test_parse_method_unknown() {
+        assert_eq!(parse_method("UNKNOWN"), Method::GET);
+        assert_eq!(parse_method(""), Method::GET);
+    }
+
+    #[test]
+    fn test_http_request_default() {
+        let request = HttpRequest {
+            method: "GET".to_string(),
+            url: "https://example.com".to_string(),
+            headers: vec![],
+            body: None,
+        };
+        assert_eq!(request.method, "GET");
+        assert_eq!(request.url, "https://example.com");
+    }
+
+    #[test]
+    fn test_http_header_enabled() {
+        let header = HttpHeader {
+            key: "Content-Type".to_string(),
+            value: "application/json".to_string(),
+            enabled: true,
+        };
+        assert!(header.enabled);
+        assert_eq!(header.key, "Content-Type");
+    }
+
+    #[test]
+    fn test_request_result_success() {
+        let result = RequestResult {
+            success: true,
+            response: Some(HttpResponse {
+                status: 200,
+                status_text: "OK".to_string(),
+                headers: HashMap::new(),
+                body: "{}".to_string(),
+                content_type: "application/json".to_string(),
+                size: 2,
+                time: 100,
+            }),
+            error: None,
+        };
+        assert!(result.success);
+        assert!(result.response.is_some());
+        assert!(result.error.is_none());
+    }
+
+    #[test]
+    fn test_request_result_error() {
+        let result = RequestResult {
+            success: false,
+            response: None,
+            error: Some("Connection failed".to_string()),
+        };
+        assert!(!result.success);
+        assert!(result.response.is_none());
+        assert_eq!(result.error, Some("Connection failed".to_string()));
+    }
+}
