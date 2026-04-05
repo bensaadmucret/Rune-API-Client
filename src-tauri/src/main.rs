@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    postman_clone_lib::run()
+    rune_api_client_lib::run()
 }
