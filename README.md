@@ -7,7 +7,7 @@ A powerful, cross-platform API testing client built with **Rust**, **Tauri**, an
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Tech Stack](https://img.shields.io/badge/stack-Rust%20%7C%20Tauri%20%7C%20Vue.js-orange.svg)
 ![Status](https://img.shields.io/badge/status-in%20development-green.svg)
-![Coverage](https://img.shields.io/badge/coverage-63%25-yellowgreen.svg)
+![Coverage](https://img.shields.io/badge/coverage-70%25-yellowgreen.svg)
 
 ---
 
