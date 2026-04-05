@@ -110,4 +110,197 @@ describe('App Store', () => {
 
     expect(store.isLoading).toBe(false);
   });
+
+  it('toggles details panel', () => {
+    const store = useAppStore();
+    expect(store.isDetailsPanelOpen).toBe(false);
+
+    store.toggleDetailsPanel();
+    expect(store.isDetailsPanelOpen).toBe(true);
+
+    store.toggleDetailsPanel();
+    expect(store.isDetailsPanelOpen).toBe(false);
+  });
+
+  it('opens and closes details panel', () => {
+    const store = useAppStore();
+
+    store.openDetailsPanel();
+    expect(store.isDetailsPanelOpen).toBe(true);
+
+    store.closeDetailsPanel();
+    expect(store.isDetailsPanelOpen).toBe(false);
+  });
+
+  it('sets sidebar tab', () => {
+    const store = useAppStore();
+    expect(store.sidebarActiveTab).toBe('collections');
+
+    store.setSidebarTab('history');
+    expect(store.sidebarActiveTab).toBe('history');
+  });
+
+  it('sets active environment', () => {
+    const store = useAppStore();
+    store.environments = [
+      { id: 'env-1', name: 'Dev', variables: [], createdAt: Date.now(), updatedAt: Date.now() },
+      { id: 'env-2', name: 'Prod', variables: [], createdAt: Date.now(), updatedAt: Date.now() },
+    ] as any;
+
+    store.setActiveEnvironment('env-2');
+    expect(store.activeEnvironmentId).toBe('env-2');
+    expect(store.activeEnvironment?.name).toBe('Prod');
+  });
+
+  it('returns empty variables when no active environment', () => {
+    const store = useAppStore();
+    store.activeEnvironmentId = null;
+    expect(store.variables).toEqual([]);
+  });
+
+  it('adds collection and returns it', async () => {
+    const mockCollection = { id: 'col-1', name: 'API Tests', folders: [], requests: [] };
+    mockedInvoke.mockResolvedValue(mockCollection as any);
+
+    const store = useAppStore();
+    const result = await store.addCollection({
+      name: 'API Tests',
+      description: '',
+      color: '#3b82f6',
+    });
+
+    expect(result.id).toBe('col-1');
+    expect(store.collections).toHaveLength(1);
+    expect(mockedInvoke).toHaveBeenCalledWith('create_collection', {
+      req: { name: 'API Tests', description: '', color: '#3b82f6' },
+    });
+  });
+
+  it('updates collection locally', async () => {
+    mockedInvoke.mockResolvedValue(undefined as any);
+
+    const store = useAppStore();
+    store.collections = [
+      { id: 'col-1', name: 'Old Name', description: '', color: '#000', updatedAt: 1000 } as any,
+    ];
+
+    await store.updateCollection('col-1', { name: 'New Name' });
+
+    expect(store.collections[0].name).toBe('New Name');
+    expect(store.collections[0].updatedAt).toBeGreaterThan(1000);
+  });
+
+  it('removes collection and updates state', async () => {
+    mockedInvoke.mockResolvedValue(undefined as any);
+
+    const store = useAppStore();
+    store.collections = [
+      { id: 'col-1', name: 'Test', folders: [], requests: [] } as any,
+      { id: 'col-2', name: 'Other', folders: [], requests: [] } as any,
+    ];
+
+    await store.removeCollection('col-1');
+
+    expect(store.collections).toHaveLength(1);
+    expect(store.collections[0].id).toBe('col-2');
+  });
+
+  it('adds folder to collection', async () => {
+    const mockFolder = { id: 'folder-1', name: 'Auth', requests: [] };
+    mockedInvoke.mockResolvedValue(mockFolder as any);
+
+    const store = useAppStore();
+    store.collections = [
+      { id: 'col-1', name: 'API', folders: [], requests: [], updatedAt: 1000 } as any,
+    ];
+
+    const result = await store.addFolder('col-1', { name: 'Auth' });
+
+    expect(result.id).toBe('folder-1');
+    expect(store.collections[0].folders).toHaveLength(1);
+    expect(store.collections[0].folders[0].name).toBe('Auth');
+  });
+
+  it('removes folder from collection', async () => {
+    mockedInvoke.mockResolvedValue(undefined as any);
+
+    const store = useAppStore();
+    store.collections = [
+      {
+        id: 'col-1',
+        name: 'API',
+        folders: [{ id: 'f-1', name: 'Auth', requests: [] }],
+        requests: [],
+        updatedAt: 1000,
+      } as any,
+    ];
+
+    await store.removeFolder('col-1', 'f-1');
+
+    expect(store.collections[0].folders).toHaveLength(0);
+  });
+
+  it('adds environment and sets it active', async () => {
+    const mockEnv = { id: 'env-new', name: 'Staging', variables: [] };
+    mockedInvoke.mockResolvedValue(mockEnv as any);
+
+    const store = useAppStore();
+    const result = await store.addEnvironment({ name: 'Staging' });
+
+    expect(result.id).toBe('env-new');
+    expect(store.activeEnvironmentId).toBe('env-new');
+    expect(store.environments).toHaveLength(1);
+  });
+
+  it('removes environment and clears active when last one', async () => {
+    mockedInvoke.mockResolvedValue(undefined as any);
+
+    const store = useAppStore();
+    store.environments = [
+      {
+        id: 'env-1',
+        name: 'Dev',
+        variables: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      } as any,
+    ];
+    store.activeEnvironmentId = 'env-1';
+
+    await store.removeEnvironment('env-1');
+
+    expect(store.environments).toHaveLength(0);
+    expect(store.activeEnvironmentId).toBeNull();
+  });
+
+  it('initializes data by loading collections and environments', async () => {
+    mockedInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_collections') return Promise.resolve([]);
+      if (cmd === 'get_environments') return Promise.resolve([]);
+      return Promise.resolve([]);
+    });
+
+    const store = useAppStore();
+    await store.initialize();
+
+    expect(mockedInvoke).toHaveBeenCalledWith('get_collections');
+    expect(mockedInvoke).toHaveBeenCalledWith('get_environments');
+  });
+
+  it('loads collections with folders and requests', async () => {
+    const mockCollection = { id: 'col-1', name: 'Test', folders: [], requests: [] };
+    mockedInvoke.mockImplementation((cmd: string, args?: any) => {
+      if (cmd === 'get_collections') return Promise.resolve([mockCollection]);
+      if (cmd === 'get_folders') return Promise.resolve([{ id: 'f-1', name: 'Folder1' }]);
+      if (cmd === 'get_requests') return Promise.resolve([{ id: 'req-1', name: 'Request1' }]);
+      return Promise.resolve([]);
+    });
+
+    const store = useAppStore();
+    await store.loadCollections();
+
+    expect(store.collections).toHaveLength(1);
+    expect(store.collections[0].folders).toHaveLength(1);
+    expect(store.collections[0].requests).toHaveLength(1);
+  });
 });
