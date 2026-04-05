@@ -46,8 +46,11 @@ export const useAppStore = defineStore('app', () => {
       const data = await invoke<Collection[]>('get_collections');
       // Load folders and requests for each collection
       for (const collection of data) {
-        collection.folders = await invoke<Folder[]>('get_folders', { collection_id: collection.id });
-        collection.requests = await invoke('get_requests', { collection_id: collection.id, folder_id: null });
+        collection.folders = await invoke<Folder[]>('get_folders', { collectionId: collection.id });
+        collection.requests = await invoke('get_requests', {
+          collectionId: collection.id,
+          folderId: null,
+        });
       }
       collections.value = data;
     } catch (error) {
@@ -62,7 +65,15 @@ export const useAppStore = defineStore('app', () => {
       const data = await invoke<Environment[]>('get_environments');
       // Load variables for each environment
       for (const env of data) {
-        env.variables = await invoke<EnvironmentVariable[]>('get_environment_variables', { environment_id: env.id });
+        const vars = await invoke<EnvironmentVariable[]>('get_environment_variables', {
+          environmentId: env.id,
+        });
+        // Map backend variable type field to frontend `type`
+        env.variables = vars.map(v => ({
+          key: v.key,
+          value: v.value,
+          type: (v as any).var_type || v.type || 'default',
+        }));
       }
       environments.value = data;
       if (data.length > 0 && !activeEnvironmentId.value) {
@@ -81,7 +92,7 @@ export const useAppStore = defineStore('app', () => {
           name: collection.name,
           description: collection.description,
           color: collection.color,
-        }
+        },
       });
       newCollection.folders = [];
       newCollection.requests = [];
@@ -103,7 +114,7 @@ export const useAppStore = defineStore('app', () => {
             name: updates.name || collection.name,
             description: updates.description ?? collection.description,
             color: updates.color ?? collection.color,
-          }
+          },
         });
         Object.assign(collection, { ...updates, updatedAt: Date.now() });
       }
@@ -125,13 +136,16 @@ export const useAppStore = defineStore('app', () => {
   }
 
   // Folder actions with SQLite
-  async function addFolder(collectionId: string, folder: { id?: string; name: string; requests?: any[] }) {
+  async function addFolder(
+    collectionId: string,
+    folder: { id?: string; name: string; requests?: any[] }
+  ) {
     try {
       const newFolder = await invoke<Folder>('create_folder', {
         req: {
-          collection_id: collectionId,
+          collectionId: collectionId,
           name: folder.name,
-        }
+        },
       });
       newFolder.requests = [];
       const collection = collections.value.find(c => c.id === collectionId);
@@ -167,29 +181,29 @@ export const useAppStore = defineStore('app', () => {
     try {
       const newRequest = await invoke('create_request', {
         req: {
-          collection_id: collectionId,
-          folder_id: folderId,
+          collectionId: collectionId,
+          folderId: folderId,
           name: request.name,
           method: request.method,
           url: request.url,
           headers: request.headers,
           body: request.body,
-          body_type: request.bodyType,
-          raw_content_type: request.rawContentType,
-        }
+          bodyType: request.bodyType,
+          rawContentType: request.rawContentType,
+        },
       });
-      
+
       const collection = collections.value.find(c => c.id === collectionId);
       if (collection) {
         if (folderId) {
           const folder = collection.folders.find(f => f.id === folderId);
           if (folder) {
             folder.requests = folder.requests || [];
-            folder.requests.push(newRequest);
+            folder.requests.push(newRequest as any);
             folder.updatedAt = Date.now();
           }
         } else {
-          collection.requests.push(newRequest);
+          collection.requests.push(newRequest as any);
         }
         collection.updatedAt = Date.now();
       }
@@ -200,7 +214,11 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  async function removeRequestFromCollection(collectionId: string, requestId: string, folderId?: string) {
+  async function removeRequestFromCollection(
+    collectionId: string,
+    requestId: string,
+    folderId?: string
+  ) {
     try {
       await invoke('delete_request', { id: requestId });
       const collection = collections.value.find(c => c.id === collectionId);
@@ -228,19 +246,18 @@ export const useAppStore = defineStore('app', () => {
   }
 
   // Environment actions with SQLite
-  async function addEnvironment(env: Omit<Environment, 'id' | 'variables'>) {
+  async function addEnvironment(env: { name: string; isGlobal?: boolean }) {
     try {
       const newEnv = await invoke<Environment>('create_environment', {
         req: {
           name: env.name,
-          is_global: env.isGlobal || false,
-        }
+          isGlobal: env.isGlobal || false,
+        },
       });
       newEnv.variables = [];
       environments.value.push(newEnv);
-      if (!activeEnvironmentId.value) {
-        activeEnvironmentId.value = newEnv.id;
-      }
+      // Always set the new environment as active so user can add variables immediately
+      activeEnvironmentId.value = newEnv.id;
       return newEnv;
     } catch (error) {
       console.error('Failed to create environment:', error);
@@ -255,15 +272,21 @@ export const useAppStore = defineStore('app', () => {
   async function updateEnvironmentVariables(id: string, variables: EnvironmentVariable[]) {
     try {
       await invoke('set_environment_variables', {
-        environment_id: id,
+        environmentId: id,
         variables: variables.map(v => ({
-          ...v,
-          var_type: v.type,
-        }))
+          id: v.id || null,
+          environmentId: id,
+          key: v.key,
+          value: v.value,
+          varType: v.type,
+        })),
       });
-      const env = environments.value.find(e => e.id === id);
-      if (env) {
-        env.variables = variables;
+      const index = environments.value.findIndex(e => e.id === id);
+      if (index !== -1) {
+        environments.value[index] = {
+          ...environments.value[index],
+          variables: [...variables],
+        };
       }
     } catch (error) {
       console.error('Failed to update environment variables:', error);
@@ -277,7 +300,8 @@ export const useAppStore = defineStore('app', () => {
       if (index !== -1) {
         environments.value.splice(index, 1);
         if (activeEnvironmentId.value === id) {
-          activeEnvironmentId.value = environments.value.length > 0 ? environments.value[0].id : null;
+          activeEnvironmentId.value =
+            environments.value.length > 0 ? environments.value[0].id : null;
         }
       }
     } catch (error) {
@@ -287,10 +311,7 @@ export const useAppStore = defineStore('app', () => {
 
   // Initialize data
   async function initialize() {
-    await Promise.all([
-      loadCollections(),
-      loadEnvironments(),
-    ]);
+    await Promise.all([loadCollections(), loadEnvironments()]);
   }
 
   return {

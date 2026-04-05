@@ -27,32 +27,37 @@ function close() {
 }
 
 function addVariable() {
-  variables.value.push({
-    key: '',
-    value: '',
-    type: 'default',
-  });
+  variables.value = [...variables.value, { key: '', value: '', type: 'default' }];
 }
 
 function removeVariable(index: number) {
-  variables.value.splice(index, 1);
+  variables.value = variables.value.filter((_, i) => i !== index);
 }
 
-function createEnvironment() {
+async function createEnvironment() {
   if (!name.value.trim()) {
     error.value = t('modal.environmentNameRequired');
     return;
   }
 
-  const env = {
-    id: crypto.randomUUID(),
-    name: name.value.trim(),
-    variables: variables.value.filter(v => v.key.trim()),
-    isGlobal: false,
-  };
+  try {
+    error.value = '';
+    const env = {
+      name: name.value.trim(),
+      isGlobal: false,
+    };
 
-  appStore.addEnvironment(env);
-  close();
+    const newEnv = await appStore.addEnvironment(env);
+
+    const validVariables = variables.value.filter(v => v.key.trim());
+    if (validVariables.length > 0 && newEnv) {
+      await appStore.updateEnvironmentVariables(newEnv.id, validVariables);
+    }
+
+    close();
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : t('common.error');
+  }
 }
 </script>
 
@@ -73,13 +78,20 @@ function createEnvironment() {
       <div class="bg-white rounded-lg shadow-xl w-[600px] max-w-[90vw] max-h-[80vh] flex flex-col">
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb]">
-          <h2 class="text-lg font-semibold text-[#111827]">{{ t('modal.newEnvironment') }}</h2>
+          <h2 class="text-lg font-semibold text-[#111827]">
+            {{ t('modal.newEnvironment') }}
+          </h2>
           <button
             class="p-1.5 text-[#6b7280] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -96,18 +108,27 @@ function createEnvironment() {
               :placeholder="t('modal.environmentNamePlaceholder')"
               class="w-full px-3 py-2 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent"
             />
-            <p v-if="error" class="mt-1 text-sm text-[#ef4444]">{{ error }}</p>
+            <p v-if="error" class="mt-1 text-sm text-[#ef4444]">
+              {{ error }}
+            </p>
           </div>
 
           <div>
             <div class="flex items-center justify-between mb-2">
-              <label class="block text-sm font-medium text-[#374151]">{{ t('common.variables') }}</label>
+              <label class="block text-sm font-medium text-[#374151]">{{
+                t('common.variables')
+              }}</label>
               <button
                 class="flex items-center gap-1 px-2 py-1 text-sm text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors"
                 @click="addVariable"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 {{ t('common.addVariable') }}
               </button>
@@ -135,15 +156,24 @@ function createEnvironment() {
                   v-model="variable.type"
                   class="px-2 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
                 >
-                  <option value="default">{{ t('common.default') }}</option>
-                  <option value="secret">{{ t('common.secret') }}</option>
+                  <option value="default">
+                    {{ t('common.default') }}
+                  </option>
+                  <option value="secret">
+                    {{ t('common.secret') }}
+                  </option>
                 </select>
                 <button
                   class="p-2 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-md transition-colors"
                   @click="removeVariable(index)"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -156,7 +186,9 @@ function createEnvironment() {
         </div>
 
         <!-- Footer -->
-        <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg">
+        <div
+          class="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg"
+        >
           <button
             class="px-4 py-2 text-sm font-medium text-[#6b7280] hover:text-[#374151] hover:bg-[#f3f4f6] rounded-md transition-colors"
             @click="close"

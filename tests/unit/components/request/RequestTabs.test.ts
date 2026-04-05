@@ -190,7 +190,7 @@ describe('UC-003: Auto-generated Headers', () => {
   });
 
   describe('Headers auto grisés/désactivés visuellement', () => {
-    it('affiche les headers auto avec classe opacity réduite', async () => {
+    it('affiche les headers auto sans opacité réduite pour meilleure UX', async () => {
       const wrapper = mount(RequestTabs);
 
       await wrapper.find('[data-testid="auto-headers-toggle"]').trigger('click');
@@ -198,7 +198,8 @@ describe('UC-003: Auto-generated Headers', () => {
 
       const autoHeaderRow = wrapper.find('[data-testid="auto-header-row"]');
       expect(autoHeaderRow.exists()).toBe(true);
-      expect(autoHeaderRow.classes()).toContain('opacity-60');
+      expect(autoHeaderRow.classes()).not.toContain('opacity-60');
+      expect(autoHeaderRow.classes()).not.toContain('opacity-40');
     });
 
     it('rend les inputs des headers auto en readonly', async () => {

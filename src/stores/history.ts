@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { invoke } from '@tauri-apps/api/core';
-import type { RequestHistory, HttpRequest, HttpResponse } from '../types';
+import type { RequestHistory } from '../types';
 
 export const useHistoryStore = defineStore('history', () => {
   // State
@@ -38,18 +38,20 @@ export const useHistoryStore = defineStore('history', () => {
             body: entry.request.body,
             body_type: entry.request.bodyType,
           },
-          response: entry.response ? {
-            status: entry.response.status,
-            status_text: entry.response.statusText,
-            headers: entry.response.headers,
-            body: entry.response.body,
-            content_type: entry.response.contentType,
-            size: entry.response.size,
-            time: entry.response.time,
-          } : null,
-        }
+          response: entry.response
+            ? {
+                status: entry.response.status,
+                status_text: entry.response.statusText,
+                headers: entry.response.headers,
+                body: entry.response.body,
+                content_type: entry.response.contentType,
+                size: entry.response.size,
+                time: entry.response.time,
+              }
+            : null,
+        },
       });
-      
+
       // Add to local state
       history.value.unshift(entry);
       if (history.value.length > 100) {

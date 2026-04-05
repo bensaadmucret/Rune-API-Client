@@ -72,7 +72,7 @@ describe('UC-004: Override des Headers Auto', () => {
     });
 
     it('deux headers manuels avec même clé - dernier gagne', async () => {
-      const wrapper = mount(RequestTabs);
+      mount(RequestTabs);
       const store = useRequestStore();
 
       // Ajouter deux Content-Type manuels
@@ -105,7 +105,7 @@ describe('UC-004: Override des Headers Auto', () => {
       expect(contentTypeRow).toBeDefined();
 
       // Vérifier qu'il a une classe ou attribut indiquant l'override
-      const overriddenIndicator = contentTypeRow?.find('[data-testid="overridden-indicator"]');
+      contentTypeRow?.find('[data-testid="overridden-indicator"]');
       // Pour l'instant on vérifie juste que le row existe
       expect(contentTypeRow?.exists()).toBe(true);
     });

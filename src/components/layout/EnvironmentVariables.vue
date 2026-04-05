@@ -2,10 +2,12 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../../stores/app';
+import type { EnvironmentVariable } from '../../types';
 
 const { t } = useI18n();
 const appStore = useAppStore();
 const showVariables = ref(false);
+const usageVariableToken = '{{variable_name}}';
 
 const activeEnvVars = computed(() => {
   const env = appStore.activeEnvironment;
@@ -15,14 +17,16 @@ const activeEnvVars = computed(() => {
 function addVariable() {
   const env = appStore.activeEnvironment;
   if (env) {
+    // Don't send id for new variables - backend will generate it
+    const newVar = { key: '', value: '', type: 'default' as const };
     appStore.updateEnvironmentVariables(env.id, [
       ...env.variables,
-      { key: '', value: '', type: 'default' }
+      { key: newVar.key, value: newVar.value, type: newVar.type },
     ]);
   }
 }
 
-function updateVariable(index: number, updates: Partial<{ key: string; value: string; type: 'default' | 'secret' }>) {
+function updateVariable(index: number, updates: Partial<EnvironmentVariable>) {
   const env = appStore.activeEnvironment;
   if (env) {
     const vars = [...env.variables];
@@ -52,10 +56,16 @@ function close() {
       @click="showVariables = true"
     >
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+        />
       </svg>
       <span v-if="activeEnvVars.length > 0">
-        {{ activeEnvVars.length }} {{ activeEnvVars.length > 1 ? t('common.variables') : t('common.variable') }}
+        {{ activeEnvVars.length }}
+        {{ activeEnvVars.length > 1 ? t('common.variables') : t('common.variable') }}
       </span>
       <span v-else>{{ t('environment.title') }}</span>
     </button>
@@ -74,11 +84,15 @@ function close() {
         class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
         @click.self="close"
       >
-        <div class="bg-white rounded-lg shadow-xl w-[500px] max-w-[90vw] max-h-[80vh] flex flex-col">
+        <div
+          class="bg-white rounded-lg shadow-xl w-[620px] max-w-[95vw] max-h-[80vh] flex flex-col"
+        >
           <!-- Header -->
           <div class="flex items-center justify-between px-4 py-3 border-b border-[#e5e7eb]">
             <div>
-              <h2 class="text-lg font-semibold text-[#111827]">{{ t('environment.title') }}</h2>
+              <h2 class="text-lg font-semibold text-[#111827]">
+                {{ t('environment.title') }}
+              </h2>
               <p class="text-xs text-[#6b7280] mt-0.5">
                 {{ appStore.activeEnvironment?.name || t('environment.noEnvironmentSelected') }}
               </p>
@@ -88,23 +102,47 @@ function close() {
               @click="close"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
 
           <!-- Content -->
-          <div class="flex-1 overflow-y-auto p-4">
+          <div class="flex-1 overflow-y-auto overflow-x-hidden p-4">
             <div v-if="!appStore.activeEnvironment" class="text-center py-8 text-[#6b7280]">
-              <svg class="w-12 h-12 mx-auto mb-3 text-[#d1d5db]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg
+                class="w-12 h-12 mx-auto mb-3 text-[#d1d5db]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
-              <p class="text-sm">{{ t('environment.selectEnvironmentFirst') }}</p>
+              <p class="text-sm">
+                {{ t('environment.selectEnvironmentFirst') }}
+              </p>
             </div>
 
             <div v-else-if="activeEnvVars.length === 0" class="text-center py-8 text-[#6b7280]">
-              <p class="text-sm">{{ t('environment.noVariables') }}</p>
+              <p class="text-sm">
+                {{ t('environment.noVariables') }}
+              </p>
               <button
                 class="mt-2 px-3 py-1.5 text-sm text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors"
                 @click="addVariable"
@@ -117,36 +155,51 @@ function close() {
               <div
                 v-for="(variable, index) in activeEnvVars"
                 :key="index"
-                class="flex items-center gap-2"
+                class="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-2 items-center"
               >
                 <input
                   :value="variable.key"
                   type="text"
                   :placeholder="t('environment.variablePlaceholder')"
-                  class="flex-1 px-3 py-2 border border-[#e5e7eb] rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
+                  class="w-full min-w-0 px-3 py-2 border border-[#e5e7eb] rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
                   @input="updateVariable(index, { key: ($event.target as HTMLInputElement).value })"
                 />
                 <input
                   :value="variable.value"
                   :type="variable.type === 'secret' ? 'password' : 'text'"
                   :placeholder="t('environment.valuePlaceholder')"
-                  class="flex-1 px-3 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
-                  @input="updateVariable(index, { value: ($event.target as HTMLInputElement).value })"
+                  class="w-full min-w-0 px-3 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
+                  @input="
+                    updateVariable(index, { value: ($event.target as HTMLInputElement).value })
+                  "
                 />
                 <select
                   :value="variable.type"
-                  class="px-2 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
-                  @change="updateVariable(index, { type: ($event.target as HTMLSelectElement).value as 'default' | 'secret' })"
+                  class="w-full sm:w-28 px-2 py-2 border border-[#e5e7eb] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
+                  @change="
+                    updateVariable(index, {
+                      type: ($event.target as HTMLSelectElement).value as 'default' | 'secret',
+                    })
+                  "
                 >
-                  <option value="default">{{ t('common.default') }}</option>
-                  <option value="secret">{{ t('common.secret') }}</option>
+                  <option value="default">
+                    {{ t('common.default') }}
+                  </option>
+                  <option value="secret">
+                    {{ t('common.secret') }}
+                  </option>
                 </select>
                 <button
-                  class="p-2 text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-md transition-colors"
+                  class="p-2 justify-self-end text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-md transition-colors"
                   @click="removeVariable(index)"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -154,14 +207,24 @@ function close() {
           </div>
 
           <!-- Footer -->
-          <div v-if="appStore.activeEnvironment" class="flex items-center justify-between px-4 py-3 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg">
-            <span class="text-xs text-[#6b7280]">{{ t('environment.usageHint') }}</span>
+          <div
+            v-if="appStore.activeEnvironment"
+            class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg"
+          >
+            <span class="text-xs text-[#6b7280] flex-1 min-w-[220px]">{{
+              t('environment.usageHint', { variableName: usageVariableToken })
+            }}</span>
             <button
-              class="flex items-center gap-1 px-3 py-1.5 text-sm text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors"
+              class="flex items-center gap-1 px-3 py-1.5 text-sm text-[#3b82f6] hover:bg-[#eff6ff] rounded-md transition-colors shrink-0"
               @click="addVariable"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               {{ t('common.addVariable') }}
             </button>

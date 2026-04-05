@@ -52,10 +52,12 @@ pub struct Environment {
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct EnvironmentVariable {
-    pub id: i64,
+    pub id: Option<i64>,
+    #[serde(alias = "environmentId")]
     pub environment_id: String,
     pub key: String,
     pub value: String,
+    #[serde(alias = "varType")]
     pub var_type: String,
 }
 
@@ -99,6 +101,7 @@ pub struct CreateCollectionRequest {
 // For creating folders
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateFolderRequest {
+    #[serde(alias = "collectionId")]
     pub collection_id: String,
     pub name: String,
 }
@@ -106,14 +109,18 @@ pub struct CreateFolderRequest {
 // For creating requests
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateRequestRequest {
+    #[serde(alias = "collectionId")]
     pub collection_id: Option<String>,
+    #[serde(alias = "folderId")]
     pub folder_id: Option<String>,
     pub name: Option<String>,
     pub method: String,
     pub url: String,
     pub headers: Vec<HttpHeader>,
     pub body: Option<String>,
+    #[serde(alias = "bodyType")]
     pub body_type: String,
+    #[serde(alias = "rawContentType")]
     pub raw_content_type: Option<String>,
 }
 
@@ -121,6 +128,7 @@ pub struct CreateRequestRequest {
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateEnvironmentRequest {
     pub name: String,
+    #[serde(alias = "isGlobal")]
     pub is_global: bool,
 }
 

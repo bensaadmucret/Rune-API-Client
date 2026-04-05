@@ -65,9 +65,12 @@ export interface Environment {
   name: string;
   variables: EnvironmentVariable[];
   isGlobal?: boolean;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface EnvironmentVariable {
+  id?: number;
   key: string;
   value: string;
   type: 'default' | 'secret';
