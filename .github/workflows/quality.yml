@@ -106,3 +106,10 @@ jobs:
       - name: Tauri clippy
         run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
         continue-on-error: true
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run security audit
+        working-directory: src-tauri
+        run: cargo audit
