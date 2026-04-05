@@ -21,17 +21,6 @@ A powerful, cross-platform API testing client built with **Rust**, **Tauri**, an
 - 📝 **Request Body** - Support for raw (JSON, XML, Text, HTML), form-data, and url-encoded formats
 - 🔍 **Query Parameters** - Automatic URL parsing and manual param editing with enable/disable toggle
 
-### Headers Enhancement Suite
-
-| Feature                                                          | Description                                      | Status      |
-| ---------------------------------------------------------------- | ------------------------------------------------ | ----------- |
-| [UC-001: Header Autocomplete](#uc-001-header-autocomplete)       | Smart suggestions for 52+ standard HTTP headers  | ✅ Complete |
-| [UC-002: Header Presets](#uc-002-header-presets)                 | Save and reuse header combinations               | ✅ Complete |
-| [UC-003: Auto-generated Headers](#uc-003-auto-generated-headers) | View system-added headers (Content-Length, etc.) | ✅ Complete |
-| [UC-004: Override Auto Headers](#uc-004-override-auto-headers)   | Replace auto-generated headers with custom ones  | ✅ Complete |
-| [UC-005: Bulk Edit](#uc-005-bulk-edit)                           | Copy/paste headers from curl or text format      | ✅ Complete |
-| [UC-006: Header Descriptions](#uc-006-header-descriptions)       | Document headers with descriptions for your team | ✅ Complete |
-
 📚 **[Full Documentation](doc/)** | 🌐 **[GitHub Wiki](https://github.com/bensaadmucret/Rune-API-Client/wiki)**
 
 ---
