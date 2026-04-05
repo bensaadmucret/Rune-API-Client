@@ -18,7 +18,7 @@ A powerful, cross-platform API testing client built with **Rust**, **Tauri**, an
 - 🚀 **HTTP Requests** - Support for GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS
 - 📋 **Request Builder** - Intuitive interface with method selector, URL input, and quick actions
 - 🔧 **Headers Management** - Add, edit, enable/disable custom headers with count indicator
-- 🎯 **Header Autocomplete (UC-001)** - Smart suggestions for HTTP header keys with descriptions and common values
+- 🎯 **Header Autocomplete** - Smart suggestions for HTTP header keys with descriptions and common values
 - 📝 **Request Body** - Support for raw (JSON, XML, Text, HTML), form-data, and url-encoded formats
 - 🔍 **Query Parameters** - Automatic URL parsing and manual param editing with enable/disable toggle
 
