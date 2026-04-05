@@ -135,9 +135,10 @@ interface HeaderPresetState {
 
 ## Sécurité
 
-- **CSP** : Configuré dans `src-tauri/tauri.conf.json`
+- **CSP** : Politique explicite configurée dans `src-tauri/tauri.conf.json` (plus de valeur `null`)
 - **IPC** : Communication sécurisée frontend ↔ backend
 - **SQL Injection** : Prévention via requêtes paramétrées Rust
+- **Secrets d'environnement** : Stockés chiffrés au repos dans SQLite, déchiffrés à la lecture
 
 ## Extension future
 

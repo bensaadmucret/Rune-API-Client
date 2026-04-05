@@ -1,8 +1,66 @@
 use crate::database::models::*;
 use crate::database::Database;
+use base64::engine::general_purpose::STANDARD as BASE64;
+use base64::Engine;
 use serde_json;
-use sqlx::Row;
+use sqlx::{Pool, Row, Sqlite};
 use tauri::State;
+
+const SECRET_PREFIX: &str = "enc:v1:";
+
+fn xor_cipher(data: &[u8], key: &[u8]) -> Vec<u8> {
+    if key.is_empty() {
+        return data.to_vec();
+    }
+
+    data.iter()
+        .enumerate()
+        .map(|(i, b)| b ^ key[i % key.len()])
+        .collect()
+}
+
+async fn get_or_create_secret_key(pool: &Pool<Sqlite>) -> Result<Vec<u8>, String> {
+    let existing: Option<String> = sqlx::query_scalar("SELECT value FROM app_settings WHERE key = ?")
+        .bind("secret_encryption_key")
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if let Some(value) = existing {
+        return Ok(value.into_bytes());
+    }
+
+    let generated = uuid::Uuid::new_v4().to_string();
+    sqlx::query("INSERT INTO app_settings (key, value) VALUES (?, ?)")
+        .bind("secret_encryption_key")
+        .bind(&generated)
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(generated.into_bytes())
+}
+
+fn encrypt_secret_value(value: &str, key: &[u8]) -> String {
+    if value.is_empty() {
+        return String::new();
+    }
+
+    let encrypted = xor_cipher(value.as_bytes(), key);
+    format!("{}{}", SECRET_PREFIX, BASE64.encode(encrypted))
+}
+
+fn decrypt_secret_value(value: &str, key: &[u8]) -> String {
+    if let Some(encoded) = value.strip_prefix(SECRET_PREFIX) {
+        if let Ok(bytes) = BASE64.decode(encoded) {
+            if let Ok(decrypted) = String::from_utf8(xor_cipher(&bytes, key)) {
+                return decrypted;
+            }
+        }
+    }
+
+    value.to_string()
+}
 
 // Collection Commands
 #[tauri::command]
@@ -316,13 +374,22 @@ pub async fn get_environment_variables(
     db: State<'_, Database>,
     environment_id: String,
 ) -> Result<Vec<EnvironmentVariable>, String> {
-    sqlx::query_as::<_, EnvironmentVariable>(
+    let mut variables = sqlx::query_as::<_, EnvironmentVariable>(
         "SELECT * FROM environment_variables WHERE environment_id = ?",
     )
     .bind(&environment_id)
     .fetch_all(&db.pool)
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+
+    let key = get_or_create_secret_key(&db.pool).await?;
+    variables.iter_mut().for_each(|var| {
+        if var.var_type == "secret" {
+            var.value = decrypt_secret_value(&var.value, &key);
+        }
+    });
+
+    Ok(variables)
 }
 
 #[tauri::command]
@@ -331,26 +398,35 @@ pub async fn set_environment_variables(
     environment_id: String,
     variables: Vec<EnvironmentVariable>,
 ) -> Result<(), String> {
-    // Delete existing variables
+    let key = get_or_create_secret_key(&db.pool).await?;
+    let mut tx = db.pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query("DELETE FROM environment_variables WHERE environment_id = ?")
         .bind(&environment_id)
-        .execute(&db.pool)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
 
-    // Insert new variables
     for var in variables {
+        let stored_value = if var.var_type == "secret" {
+            encrypt_secret_value(&var.value, &key)
+        } else {
+            var.value
+        };
+
         sqlx::query(
             "INSERT INTO environment_variables (environment_id, key, value, type) VALUES (?, ?, ?, ?)"
         )
         .bind(&environment_id)
         .bind(&var.key)
-        .bind(&var.value)
+        .bind(&stored_value)
         .bind(&var.var_type)
-        .execute(&db.pool)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
     }
+
+    tx.commit().await.map_err(|e| e.to_string())?;
 
     Ok(())
 }

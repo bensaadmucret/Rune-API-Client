@@ -11,6 +11,8 @@ tests/
 │   │       ├── HeaderValueAutocomplete.test.ts # UC-001: Value autocomplete
 │   │       └── HeaderPresetManager.test.ts     # UC-002: Preset management UI
 │   └── stores/
+│       ├── app.test.ts                         # Core app/environments store logic
+│       ├── request.test.ts                     # Request execution/substitution store logic
 │       └── headerPresets.test.ts               # UC-002: Preset store logic
 ├── integration/                                 # (future) E2E tests
 └── README.md                                    # This file
@@ -55,11 +57,13 @@ npm test -- tests/unit/stores/headerPresets.test.ts
 Based on our experience fixing the HeaderPresetManager tests:
 
 1. **Use the same Pinia instance**: Create a helper function to get the store from the same Pinia instance used by the component:
+
    ```typescript
    const getStore = () => useHeaderPresetStore(pinia);
    ```
 
 2. **Get store AFTER mounting**: In component tests, get the store after mounting to ensure the same reactive context:
+
    ```typescript
    const wrapper = mountComponent();
    const store = getStore();
@@ -75,7 +79,10 @@ Based on our experience fixing the HeaderPresetManager tests:
 
 ## UC Coverage
 
-| UC | Test Files |
-|----|-----------|
+| UC     | Test Files                                                      |
+| ------ | --------------------------------------------------------------- |
 | UC-001 | `HeaderAutocomplete.test.ts`, `HeaderValueAutocomplete.test.ts` |
-| UC-002 | `headerPresets.test.ts`, `HeaderPresetManager.test.ts` |
+| UC-002 | `headerPresets.test.ts`, `HeaderPresetManager.test.ts`          |
+| UC-003 | `RequestTabs.test.ts`, `UC004_OverrideHeaders.test.ts`          |
+| UC-005 | `UC005_BulkEdit.test.ts`                                        |
+| UC-006 | `UC006_HeaderDescription.test.ts`                               |

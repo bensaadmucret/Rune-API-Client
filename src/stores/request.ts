@@ -10,6 +10,10 @@ import type {
 } from '../types';
 import { useAppStore } from './app';
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export const useRequestStore = defineStore('request', () => {
   // Get app store for environment variables
   const appStore = useAppStore();
@@ -110,7 +114,8 @@ export const useRequestStore = defineStore('request', () => {
     let result = text;
     env.variables.forEach(variable => {
       if (variable.key && variable.value) {
-        const regex = new RegExp(`{{\\s*${variable.key}\\s*}}`, 'g');
+        const escapedKey = escapeRegex(variable.key.trim());
+        const regex = new RegExp(`{{\\s*${escapedKey}\\s*}}`, 'g');
         result = result.replace(regex, variable.value);
       }
     });

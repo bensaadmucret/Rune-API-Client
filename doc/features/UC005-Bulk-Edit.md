@@ -125,14 +125,6 @@ X-Request-ID: {{$guid}} # Généré automatiquement
   - `generateBulkText()` - Génère le texte depuis les headers
   - `copyBulkToClipboard()` - Copie
 
-## Raccourcis
-
-| Action                | Raccourci               |
-| --------------------- | ----------------------- |
-| Toggle Bulk Edit      | Alt + B                 |
-| Copier (en mode bulk) | Ctrl + C puis clic Copy |
-| Appliquer             | Alt + Enter             |
-
 ## Cas d'erreur
 
 | Problème           | Solution                                       |

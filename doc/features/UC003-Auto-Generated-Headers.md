@@ -54,7 +54,7 @@ Vous pouvez désactiver un header spécifique :
 
 1. Trouvez le header dans la liste "Auto-generated Headers"
 2. **Décochez** la case à côté du header
-3. Le header grisé ne sera pas envoyé
+3. Le header est marqué comme désactivé et ne sera pas envoyé
 
 ### Cas d'usage
 
@@ -64,12 +64,12 @@ Vous pouvez désactiver un header spécifique :
 
 ## Différence avec les headers manuels
 
-| Caractéristique | Headers Auto          | Headers Manuel        |
-| --------------- | --------------------- | --------------------- |
-| Création        | Automatique           | Par l'utilisateur     |
-| Modification    | Via configuration     | Directe dans l'input  |
-| Désactivation   | Checkbox dédiée       | Toggle enable/disable |
-| Apparence       | Grisé/opacité réduite | Normal                |
+| Caractéristique | Headers Auto       | Headers Manuel        |
+| --------------- | ------------------ | --------------------- |
+| Création        | Automatique        | Par l'utilisateur     |
+| Modification    | Via configuration  | Directe dans l'input  |
+| Désactivation   | Checkbox dédiée    | Toggle enable/disable |
+| Apparence       | Lisible + readonly | Normal                |
 
 ## Fichiers techniques
 
