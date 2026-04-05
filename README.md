@@ -198,12 +198,12 @@ Click **Load Test Data** button in the sidebar footer to populate the app with s
 - [x] Response visualization with horizontal scroll
 - [x] Raw/Pretty JSON view modes
 - [x] Native file download dialog
-- [x] **UC-001: Header Autocomplete** - Smart header suggestions
-- [x] **UC-002: Header Presets** - Reusable header combinations
-- [x] **UC-003: Auto-generated Headers** - View system-added headers
-- [x] **UC-004: Override Auto Headers** - Replace auto headers with custom ones
-- [x] **UC-005: Bulk Edit** - Copy/paste headers from curl/text
-- [x] **UC-006: Header Descriptions** - Document headers for team
+- [x] Header Autocomplete - Smart header suggestions
+- [x] Header Presets - Reusable header combinations
+- [x] Auto-generated Headers - View system-added headers
+- [x] Override Auto Headers - Replace auto headers with custom ones
+- [x] Bulk Edit - Copy/paste headers from curl/text
+- [x] Header Descriptions - Document headers for team
 - [ ] Pre-request scripts
 - [ ] Response assertions/tests
 - [ ] WebSocket support
