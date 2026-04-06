@@ -167,12 +167,18 @@ describe('App Store', () => {
       name: 'API Tests',
       description: '',
       color: '#3b82f6',
+      folders: [],
+      requests: [],
     });
 
     expect(result.id).toBe('col-1');
     expect(store.collections).toHaveLength(1);
     expect(mockedInvoke).toHaveBeenCalledWith('create_collection', {
-      req: { name: 'API Tests', description: '', color: '#3b82f6' },
+      req: {
+        name: 'API Tests',
+        description: '',
+        color: '#3b82f6',
+      },
     });
   });
 
@@ -289,7 +295,7 @@ describe('App Store', () => {
 
   it('loads collections with folders and requests', async () => {
     const mockCollection = { id: 'col-1', name: 'Test', folders: [], requests: [] };
-    mockedInvoke.mockImplementation((cmd: string, args?: any) => {
+    mockedInvoke.mockImplementation((cmd: string, _args?: any) => {
       if (cmd === 'get_collections') return Promise.resolve([mockCollection]);
       if (cmd === 'get_folders') return Promise.resolve([{ id: 'f-1', name: 'Folder1' }]);
       if (cmd === 'get_requests') return Promise.resolve([{ id: 'req-1', name: 'Request1' }]);
