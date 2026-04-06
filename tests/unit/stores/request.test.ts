@@ -212,7 +212,7 @@ describe('Request Store', () => {
     const requestToLoad = {
       id: 'req-1',
       name: 'Get Users',
-      method: 'POST',
+      method: 'POST' as const,
       url: 'https://api.example.com/users',
       headers: [{ key: 'Content-Type', value: 'application/json', enabled: true }],
       body: '{}',
