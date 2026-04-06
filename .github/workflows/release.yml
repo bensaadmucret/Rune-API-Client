@@ -1,3 +1,18 @@
+# Release Workflow v0.1.0
+# IMPORTANT: Binaires non signés (sans codesigning) pour cette version initiale
+# 
+# Pourquoi pas de certificat ?
+# - Simplification de la release initiale (v0.1.0)
+# - Pas de compte Apple Developer ($99/an) ou Microsoft EV (coûteux)
+# - Focus sur la validation du produit avant investissement
+# 
+# Impact utilisateur:
+# - macOS: Avertissement Gatekeeper → utiliser `xattr -cr Rune-API-Client.app`
+# - Windows: SmartScreen → clic "Plus d'infos" puis "Exécuter quand même"
+# - Linux: Aucun impact (AppImage/deb standard)
+#
+# Roadmap: Codesigning prévu pour v0.2.0 avec certificats officiels
+
 name: Release
 
 on:

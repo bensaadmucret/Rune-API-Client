@@ -11,6 +11,18 @@ A powerful, cross-platform API testing client built with **Rust**, **Tauri**, an
 
 ---
 
+## ⚠️ Avertissement de sécurité (v0.1.0)
+
+Les binaires de la version v0.1.0 ne sont pas signés numériquement.
+
+- **macOS**: Utilisez `xattr -cr /Applications/Rune-API-Client.app` après installation
+- **Windows**: Cliquez "Plus d'infos" → "Exécuter quand même" au lancement
+- **Linux**: Aucune action requise
+
+📋 **[Instructions détaillées](RELEASE_NOTES.md)** | 🔒 **[Pourquoi pas de signature](RELEASE_NOTES.md#pourquoi-pas-de-signature)**
+
+---
+
 ## ✨ Features
 
 ### Core HTTP Capabilities
