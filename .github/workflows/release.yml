@@ -15,6 +15,10 @@
 
 name: Release
 
+permissions:
+  contents: write
+  actions: read
+
 on:
   push:
     tags:
@@ -58,8 +62,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifacts
-          path: |
-            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          path: src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          if-no-files-found: error
 
   # Windows build
   build-windows:
@@ -101,6 +105,7 @@ jobs:
           path: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+          if-no-files-found: error
 
   # Linux build
   build-linux:
@@ -145,6 +150,7 @@ jobs:
           path: |
             src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
             src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
+          if-no-files-found: error
 
   # Create GitHub Release
   publish:
