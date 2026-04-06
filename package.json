@@ -32,7 +32,8 @@
     "rust:test": "cd src-tauri && cargo test --all-targets --all-features",
     "rust:ci": "npm run rust:fmt:check && npm run rust:lint && npm run rust:test",
     "prepare": "husky",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "release": "npm run build && cd src-tauri && cargo tauri build"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.5.0",
