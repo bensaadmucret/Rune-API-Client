@@ -31,5 +31,15 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/bensaadmucret/Rune-API-Client/releases/latest/download/latest.json"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc2MjE3REYyRkIyRkQ5NDYKUldRdEM2SDdZZUVhUmNFR0xXN1pYdHNhdE1SU2dYdmlCbmpJcDFSTGViR1VLcUxIbHJpM0JmRUEK"
+    }
   }
 }

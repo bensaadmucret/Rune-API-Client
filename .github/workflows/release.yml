@@ -146,6 +146,38 @@ jobs:
       - name: Display structure
         run: ls -R artifacts
       
+      - name: Create updater manifest
+        run: |
+          cat > latest.json << 'EOF'
+          {
+            "version": "${{ github.ref_name }}",
+            "notes": "See CHANGELOG.md for release notes",
+            "pub_date": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "platforms": {
+              "darwin-universal": {
+                "signature": "",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Rune-API-Client_${{ github.ref_name }}_universal.dmg"
+              },
+              "darwin-aarch64": {
+                "signature": "",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Rune-API-Client_${{ github.ref_name }}_universal.dmg"
+              },
+              "darwin-x86_64": {
+                "signature": "",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Rune-API-Client_${{ github.ref_name }}_universal.dmg"
+              },
+              "linux-x86_64": {
+                "signature": "",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Rune-API-Client_${{ github.ref_name }}_amd64.AppImage"
+              },
+              "windows-x86_64": {
+                "signature": "",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Rune-API-Client_${{ github.ref_name }}_x64-setup.exe"
+              }
+            }
+          }
+          EOF
+      
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -155,6 +187,7 @@ jobs:
             artifacts/windows-artifacts/**/*.exe
             artifacts/linux-artifacts/**/*.AppImage
             artifacts/linux-artifacts/**/*.deb
+            latest.json
           body_path: CHANGELOG.md
           draft: false
           prerelease: false
