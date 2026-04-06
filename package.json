@@ -18,6 +18,8 @@
     "format": "prettier --write \"src/**/*.{vue,ts,tsx,js,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{vue,ts,tsx,js,css,md}\"",
     "type-check": "vue-tsc --noEmit",
+    "audit": "cd src-tauri && cargo audit",
+    "precommit": "npm run lint && npm run type-check && npm run audit",
     "quality": "npm run lint && npm run type-check && npm run test:ci",
     "quality:fix": "npm run lint:fix && npm run format",
     "rust:lint": "cd src-tauri && cargo clippy --all-targets --all-features -- -D warnings",
