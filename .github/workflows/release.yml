@@ -78,8 +78,10 @@ jobs:
         run: npm cache clean --force
       
       - name: Install dependencies
+        shell: pwsh
         run: |
-          rm -rf node_modules package-lock.json
+          Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
+          Remove-Item -Force package-lock.json -ErrorAction SilentlyContinue
           npm install
       
       - name: Setup Rust
