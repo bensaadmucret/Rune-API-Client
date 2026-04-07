@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifacts
-          path: src-tauri/target/**/release/bundle/dmg/*.dmg
+          path: src-tauri/target/release/bundle/**/*.dmg
           if-no-files-found: warn
 
   # Windows build
@@ -109,7 +109,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-artifacts
-          path: src-tauri/target/**/release/bundle/*/*.{msi,exe}
+          path: src-tauri/target/release/bundle/**/*.{msi,exe}
           if-no-files-found: warn
 
   # Linux build
@@ -155,7 +155,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-artifacts
-          path: src-tauri/target/**/release/bundle/*/*.{AppImage,deb}
+          path: src-tauri/target/release/bundle/**/*.{AppImage,deb}
           if-no-files-found: warn
 
   # Create GitHub Release
