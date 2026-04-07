@@ -55,8 +55,7 @@ jobs:
         run: cargo install tauri-cli --locked
       
       - name: Build macOS universal binary
-        run: cargo tauri build --target universal-apple-darwin
-        working-directory: src-tauri
+        run: cd src-tauri && cargo tauri build --target universal-apple-darwin
       
       - name: Debug bundle files
         run: |
@@ -105,8 +104,7 @@ jobs:
         run: cargo install tauri-cli --locked
       
       - name: Build Windows
-        run: cargo tauri build
-        working-directory: src-tauri
+        run: cd src-tauri && cargo tauri build
       
       - name: Debug bundle files
         shell: pwsh
@@ -161,8 +159,7 @@ jobs:
         run: cargo install tauri-cli --locked
       
       - name: Build Linux
-        run: cargo tauri build
-        working-directory: src-tauri
+        run: cd src-tauri && cargo tauri build
       
       - name: Debug bundle files
         run: |
