@@ -75,7 +75,7 @@ function commitAndPush() {
   // Add, commit, push
   exec('git add -A', { cwd });
   exec(`git commit -m "Mise à jour documentation - ${new Date().toISOString()}"`, { cwd });
-  exec('git push origin master', { cwd });
+  exec('git push origin main', { cwd });
 
   return true;
 }
