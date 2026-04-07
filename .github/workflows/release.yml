@@ -166,14 +166,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Download all artifacts
+      - name: Download macOS artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-          merge-multiple: false
+          name: macos-artifacts
+          path: artifacts/macos
+        continue-on-error: true
+      
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-artifacts
+          path: artifacts/windows
+        continue-on-error: true
+      
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-artifacts
+          path: artifacts/linux
+        continue-on-error: true
       
       - name: Display structure
-        run: ls -R artifacts
+        run: ls -laR artifacts/ 2>/dev/null || echo "No artifacts directory"
       
       - name: Create updater manifest
         run: |
