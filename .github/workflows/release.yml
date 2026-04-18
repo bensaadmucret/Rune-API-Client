@@ -67,7 +67,7 @@ jobs:
           find src-tauri/target -maxdepth 4 -type d | head -30
       
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: macos-artifacts
           path: |
@@ -116,7 +116,7 @@ jobs:
           if (Test-Path src-tauri/target/x86_64-pc-windows-msvc/release/bundle) { Get-ChildItem -Recurse src-tauri/target/x86_64-pc-windows-msvc/release/bundle } else { Write-Host "No bundle in x86_64-pc-windows-msvc" }
       
       - name: Upload Windows artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-artifacts
           path: |
@@ -169,7 +169,7 @@ jobs:
           ls -laR src-tauri/target/*/release/bundle/ 2>/dev/null || ls -laR src-tauri/target/release/bundle/ 2>/dev/null || echo "No bundle directory found"
       
       - name: Upload Linux artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-artifacts
           path: |
