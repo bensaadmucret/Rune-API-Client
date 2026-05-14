@@ -10,6 +10,8 @@ jobs:
   test:
     name: Tests & Lint
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     strategy:
       matrix:
@@ -50,6 +52,8 @@ jobs:
   build-check:
     name: Build Check
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
@@ -70,6 +74,8 @@ jobs:
   tauri-check:
     name: Tauri Check
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
